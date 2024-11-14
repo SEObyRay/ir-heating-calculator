@@ -83,7 +83,8 @@ const defaultRoom: Room = {
   floorType: 'concrete',
   ventilationType: 'natural',
   adjacentSpaces: emptyAdjacentSpaces,
-  occupancy: emptyOccupancy
+  occupancy: emptyOccupancy,
+  spotPercentage: 30
 };
 
 const InfoIcon: React.FC<{ tooltip: string }> = ({ tooltip }) => (
@@ -177,17 +178,21 @@ const Calculator: React.FC = () => {
 
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setRoom(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent as keyof Room],
-          [child]: parent === 'occupancy' ? Number(value) : value
-        }
-      }));
+      if (parent === 'occupancy') {
+        setRoom(prev => ({
+          ...prev,
+          occupancy: {
+            ...prev.occupancy,
+            [child]: Number(value)
+          }
+        }));
+      }
     } else {
       setRoom(prev => ({
         ...prev,
-        [name]: value
+        [name]: ['length', 'width', 'height', 'spotPercentage'].includes(name)
+          ? Number(value)
+          : value
       }));
     }
   };
