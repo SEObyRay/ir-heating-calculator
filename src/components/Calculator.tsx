@@ -75,19 +75,15 @@ const defaultRoom: Room = {
   width: 4,
   height: 2.6,
   type: 'living',
+  insulation: 'average',
+  heatingType: 'full',
   windows: [],
   wallType: 'brick',
   ceilingType: 'concrete',
   floorType: 'concrete',
-  insulation: 'average',
-  heatingType: 'full',
   ventilationType: 'natural',
-  spotPercentage: 30,
-  occupancy: {
-    numberOfPeople: 2,
-    hoursPerDay: 8
-  },
-  adjacentSpaces: emptyAdjacentSpaces
+  adjacentSpaces: emptyAdjacentSpaces,
+  occupancy: emptyOccupancy
 };
 
 const InfoIcon: React.FC<{ tooltip: string }> = ({ tooltip }) => (
@@ -177,12 +173,23 @@ const Calculator: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setRoom(prev => ({
-      ...prev,
-      [name]: ['length', 'width', 'height', 'spotPercentage', 'occupancy.numberOfPeople', 'occupancy.hoursPerDay'].includes(name) 
-        ? parseFloat(value) || 0 
-        : value
-    }));
+    setError('');
+
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setRoom(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof Room],
+          [child]: parent === 'occupancy' ? Number(value) : value
+        }
+      }));
+    } else {
+      setRoom(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleAddWindow = () => {
@@ -378,11 +385,10 @@ const Calculator: React.FC = () => {
           <input
             type="number"
             name="occupancy.numberOfPeople"
-            value={room.occupancy.numberOfPeople}
+            value={room.occupancy?.numberOfPeople ?? 1}
             onChange={handleInputChange}
             className="input-field"
             min="1"
-            placeholder="bijv. 2"
           />
         </div>
 
@@ -391,12 +397,11 @@ const Calculator: React.FC = () => {
           <input
             type="number"
             name="occupancy.hoursPerDay"
-            value={room.occupancy.hoursPerDay}
+            value={room.occupancy?.hoursPerDay ?? 8}
             onChange={handleInputChange}
             className="input-field"
             min="1"
             max="24"
-            placeholder="bijv. 8"
           />
         </div>
       </div>
@@ -414,7 +419,6 @@ const Calculator: React.FC = () => {
             min="1"
             max="100"
             className="input-field"
-            placeholder="bijv. 30"
           />
         </div>
       )}
