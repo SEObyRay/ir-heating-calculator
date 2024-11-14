@@ -101,19 +101,17 @@ const InfoIcon: React.FC<{ tooltip: string }> = ({ tooltip }) => (
   </div>
 );
 
-export default function Calculator() {
-  const [calculationMode, setCalculationMode] = useState<CalculationMode>('simple');
+const Calculator: React.FC = () => {
   const [room, setRoom] = useState<Room>(defaultRoom);
   const [result, setResult] = useState<CalculationResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Add ref for the result section
+  const [error, setError] = useState<string>('');
+  const [calculationMode, setCalculationMode] = useState<CalculationMode>('simple');
   const resultRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setError(null);
+      setError('');
 
       if (room.length <= 0 || room.width <= 0 || room.height <= 0) {
         setError('Alle afmetingen moeten groter zijn dan 0');
@@ -131,7 +129,7 @@ export default function Calculator() {
         return;
       }
 
-      const calculationResult = calculateHeating(room);
+      const calculationResult = calculateHeating(room, calculationMode);
       setResult(calculationResult);
       
       // Ensure the result section exists before trying to scroll
@@ -650,3 +648,5 @@ export default function Calculator() {
     </div>
   );
 }
+
+export default Calculator;
