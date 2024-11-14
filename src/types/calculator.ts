@@ -15,6 +15,7 @@ export interface Window {
   glassType: GlassType;
   orientation?: Orientation;
   hasBlinds?: boolean;
+  quantity: number;
 }
 
 export interface Room {

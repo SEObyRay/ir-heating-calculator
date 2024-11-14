@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, HeatingType, CalculationMode, Orientation } from '../types/calculator';
+import { Room, CalculationResult, RoomType, InsulationType, WindowType, GlassType, HeatingType, CalculationMode, Orientation } from '../types/calculator';
 import { calculateHeating } from '../utils/calculator';
 import { downloadReport } from '../utils/reportGenerator';
 import { TOOLTIPS } from '../constants/tooltips';
@@ -47,16 +47,7 @@ const orientationLabels: Record<Orientation, string> = {
   west: 'West'
 };
 
-interface Window {
-  width: number;
-  height: number;
-  glassType: GlassType;
-  orientation: Orientation;
-  hasBlinds: boolean;
-  quantity: number;
-}
-
-const defaultWindow: Window = {
+const defaultWindow: WindowType = {
   width: 1.2,
   height: 1.6,
   glassType: 'double',
@@ -210,7 +201,7 @@ export default function Calculator() {
     }));
   };
 
-  const handleWindowChange = (index: number, field: keyof Window, value: number | GlassType | Orientation | boolean) => {
+  const handleWindowChange = (index: number, field: keyof WindowType, value: number | GlassType | Orientation | boolean) => {
     setRoom(prev => ({
       ...prev,
       windows: prev.windows.map((window, i) => 
