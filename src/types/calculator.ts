@@ -7,12 +7,13 @@ export type CeilingType = 'concrete' | 'wood' | 'insulated' | 'uninsulated';
 export type FloorType = 'concrete' | 'wood' | 'tile' | 'carpet';
 export type VentilationType = 'natural' | 'mechanical' | 'balanced' | 'none';
 export type CalculationMode = 'simple' | 'advanced';
+export type Orientation = 'north' | 'east' | 'south' | 'west';
 
 export interface Window {
   width: number;
   height: number;
   glassType: GlassType;
-  orientation?: 'north' | 'east' | 'south' | 'west';
+  orientation?: Orientation;
   hasBlinds?: boolean;
 }
 

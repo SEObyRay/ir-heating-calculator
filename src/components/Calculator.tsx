@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, HeatingType, CalculationMode } from '../types/calculator';
+import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, HeatingType, CalculationMode, Orientation } from '../types/calculator';
 import { calculateHeating } from '../utils/calculator';
 import { downloadReport } from '../utils/reportGenerator';
 import { TOOLTIPS } from '../constants/tooltips';
@@ -34,7 +34,11 @@ const glassTypeLabels: Record<GlassType, string> = {
   triple: 'Driedubbel Glas'
 };
 
-const heatingTypes: HeatingType[] = ['volledig', 'spot'];
+const heatingTypes: HeatingType[] = ['full', 'spot'];
+const heatingTypeLabels: Record<HeatingType, string> = {
+  full: 'Volledige Ruimte',
+  spot: 'Spot Verwarming'
+};
 const orientations: Orientation[] = ['north', 'east', 'south', 'west'];
 const orientationLabels: Record<Orientation, string> = {
   north: 'Noord',
@@ -85,7 +89,7 @@ const defaultRoom: Room = {
   ceilingType: 'concrete',
   floorType: 'concrete',
   insulation: 'average',
-  heatingType: 'volledig',
+  heatingType: 'full',
   ventilationType: 'natural',
   spotPercentage: 30,
   occupancy: {
@@ -375,7 +379,7 @@ export default function Calculator() {
             onChange={handleInputChange}
             className="input-field"
           >
-            <option value="volledig">Volledige Ruimte</option>
+            <option value="full">Volledige Ruimte</option>
             <option value="spot">Specifieke Zone (Spot)</option>
           </select>
         </div>
