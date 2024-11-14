@@ -1,43 +1,66 @@
 # Infrarood Verwarmings Calculator
 
-Een web-gebaseerde calculator voor het bepalen van de optimale infrarood verwarmingscapaciteit voor verschillende ruimtes in huis.
+Een geavanceerde calculator voor het berekenen van infrarood verwarmingsvereisten voor Nederlandse woningen.
 
 ## Features
 
-- Berekent benodigde wattage op basis van:
-  - Ruimte type (woonkamer, keuken, slaapkamer, etc.)
-  - Ruimte afmetingen (lengte, breedte, hoogte)
-  - Aantal ramen
-  - Isolatie kwaliteit
-- Geeft aanbevelingen voor infrarood verwarmingspanelen
-- Toont gedetailleerde resultaten inclusief wattage per vierkante meter
+- **Twee Berekeningsmodi:**
+  - Eenvoudige berekening: Snel een schatting maken
+  - Geavanceerde berekening: Gedetailleerde analyse met alle factoren
 
-## Technische Stack
+- **Uitgebreide Factoren:**
+  - Isolatiekwaliteit
+  - Raamtypes en oriëntatie
+  - Muur-, plafond- en vloermaterialen
+  - Ventilatiesystemen
+  - Zonwering
 
-- Next.js 13 met App Router
+- **Energielabels:**
+  - Gedetailleerde energieprestatie analyse
+  - Besparingspotentieel berekening
+  - Aanbevelingen voor verbetering
+
+- **Gebruiksvriendelijk:**
+  - Intuïtieve interface
+  - Informatieve tooltips
+  - Responsive design
+  - Direct downloadbare rapporten
+
+## Technologie
+
+- Next.js 13
 - TypeScript
 - Tailwind CSS
-- React
+- Vercel hosting
 
-## Installatie
+## Live Demo
 
-1. Clone de repository
+Bekijk de live demo op: [Vercel URL]
+
+## Lokaal Ontwikkelen
+
+1. Clone de repository:
+   ```bash
+   git clone https://github.com/SEObyRay/ir-heating-calculator.git
+   ```
+
 2. Installeer dependencies:
    ```bash
+   cd ir-heating-calculator
    npm install
    ```
+
 3. Start de development server:
    ```bash
    npm run dev
    ```
-4. Open [http://localhost:3000](http://localhost:3000) in je browser
 
-## Ontwikkeling
+4. Open [http://localhost:3000](http://localhost:3000) in je browser.
 
-- `src/components/Calculator.tsx`: Hoofdcomponent met formulier en resultaten
-- `src/utils/calculator.ts`: Berekeningslogica
-- `src/types/calculator.ts`: TypeScript type definities
+## Bijdragen
+
+Bijdragen zijn welkom! Open een issue of pull request op GitHub.
 
 ## Licentie
 
-MIT
+MIT License - Zie LICENSE bestand voor details.
