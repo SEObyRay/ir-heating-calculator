@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, HeatingType, CalculationMode, Orientation, AdjacentSpaceType } from '../types/calculator';
+import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, HeatingType, Orientation, CalculationMode } from '../types/calculator';
 import { calculateHeating } from '../utils/calculator';
 import { downloadReport } from '../utils/reportGenerator';
 import { TOOLTIPS } from '../constants/tooltips';
@@ -61,7 +61,7 @@ const emptyOccupancy = {
   hoursPerDay: 8
 };
 
-const emptyAdjacentSpaces: Record<'north' | 'east' | 'south' | 'west' | 'above' | 'below', AdjacentSpaceType> = {
+const emptyAdjacentSpaces: Record<'north' | 'east' | 'south' | 'west' | 'above' | 'below', 'heated' | 'unheated' | 'outside'> = {
   north: 'outside',
   east: 'outside',
   south: 'outside',
