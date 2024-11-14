@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Room, CalculationResult, RoomType, InsulationQuality, Window, GlassType, HeatingType, Orientation, CalculationMode } from '../types/calculator';
+import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, HeatingType, CalculationMode } from '../types/calculator';
 import { calculateHeating } from '../utils/calculator';
 import { downloadReport } from '../utils/reportGenerator';
 import { TOOLTIPS } from '../constants/tooltips';
@@ -16,8 +16,8 @@ const roomTypeLabels: Record<RoomType, string> = {
   other: 'Overig'
 };
 
-const insulationQualities: InsulationQuality[] = ['poor', 'average', 'good', 'excellent'];
-const insulationLabels: Record<InsulationQuality, string> = {
+const insulationTypes: InsulationType[] = ['poor', 'average', 'good', 'excellent'];
+const insulationLabels: Record<InsulationType, string> = {
   poor: 'Slecht',
   average: 'Gemiddeld',
   good: 'Goed',
@@ -271,10 +271,10 @@ export default function Calculator() {
         </label>
         <select
           value={room.insulation}
-          onChange={(e) => setRoom({ ...room, insulation: e.target.value as InsulationQuality })}
+          onChange={(e) => setRoom({ ...room, insulation: e.target.value as InsulationType })}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         >
-          {insulationQualities.map((quality) => (
+          {insulationTypes.map((quality) => (
             <option key={quality} value={quality}>
               {insulationLabels[quality]} - {TOOLTIPS.insulation.details[quality]}
             </option>
