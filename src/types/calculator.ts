@@ -8,6 +8,7 @@ export type FloorType = 'concrete' | 'wood' | 'tile' | 'carpet';
 export type VentilationType = 'natural' | 'mechanical' | 'balanced' | 'none';
 export type CalculationMode = 'simple' | 'advanced';
 export type Orientation = 'north' | 'east' | 'south' | 'west';
+export type AdjacentSpaceType = 'heated' | 'unheated' | 'outside';
 
 export interface Window {
   width: number;
@@ -32,12 +33,12 @@ export interface Room {
   floorType: FloorType;
   ventilationType: VentilationType;
   adjacentSpaces?: {
-    north?: 'heated' | 'unheated' | 'outside';
-    east?: 'heated' | 'unheated' | 'outside';
-    south?: 'heated' | 'unheated' | 'outside';
-    west?: 'heated' | 'unheated' | 'outside';
-    above?: 'heated' | 'unheated' | 'outside';
-    below?: 'heated' | 'unheated' | 'outside';
+    north?: AdjacentSpaceType;
+    east?: AdjacentSpaceType;
+    south?: AdjacentSpaceType;
+    west?: AdjacentSpaceType;
+    above?: AdjacentSpaceType;
+    below?: AdjacentSpaceType;
   };
   occupancy?: {
     numberOfPeople: number;
