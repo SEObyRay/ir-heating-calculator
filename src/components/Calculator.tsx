@@ -70,6 +70,26 @@ const emptyAdjacentSpaces: Record<'north' | 'east' | 'south' | 'west' | 'above' 
   below: 'outside'
 };
 
+const emptyRoom: Room = {
+  type: 'living',
+  length: 0,
+  width: 0,
+  height: 0,
+  insulation: 'average',
+  heatingType: 'full',
+  windows: [],
+  wallType: 'brick',
+  ceilingType: 'concrete',
+  floorType: 'concrete',
+  ventilationType: 'natural',
+  occupancy: {
+    numberOfPeople: 1,
+    hoursPerDay: 8
+  },
+  adjacentSpaces: emptyAdjacentSpaces,
+  spotPercentage: 30
+};
+
 const defaultRoom: Room = {
   length: 6,
   width: 4,
@@ -182,8 +202,8 @@ const Calculator: React.FC = () => {
         setRoom(prev => ({
           ...prev,
           occupancy: {
-            ...prev.occupancy!,
-            [child]: Number(value) || 1
+            ...prev.occupancy,
+            [child]: Math.max(1, Number(value) || 1)
           }
         }));
       }
@@ -191,7 +211,7 @@ const Calculator: React.FC = () => {
       setRoom(prev => ({
         ...prev,
         [name]: ['length', 'width', 'height', 'spotPercentage'].includes(name)
-          ? Number(value) || 0
+          ? Math.max(0, Number(value) || 0)
           : value
       }));
     }
@@ -390,7 +410,7 @@ const Calculator: React.FC = () => {
           <input
             type="number"
             name="occupancy.numberOfPeople"
-            value={room.occupancy?.numberOfPeople ?? 1}
+            value={room.occupancy.numberOfPeople}
             onChange={handleInputChange}
             className="input-field"
             min="1"
@@ -402,7 +422,7 @@ const Calculator: React.FC = () => {
           <input
             type="number"
             name="occupancy.hoursPerDay"
-            value={room.occupancy?.hoursPerDay ?? 8}
+            value={room.occupancy.hoursPerDay}
             onChange={handleInputChange}
             className="input-field"
             min="1"

@@ -40,7 +40,7 @@ export interface Room {
     above?: AdjacentSpaceType;
     below?: AdjacentSpaceType;
   };
-  occupancy?: {
+  occupancy: {
     numberOfPeople: number;
     hoursPerDay: number;
   };
