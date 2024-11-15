@@ -182,8 +182,8 @@ const Calculator: React.FC = () => {
         setRoom(prev => ({
           ...prev,
           occupancy: {
-            ...prev.occupancy,
-            [child]: Number(value)
+            ...prev.occupancy!,
+            [child]: Number(value) || 1
           }
         }));
       }
@@ -191,7 +191,7 @@ const Calculator: React.FC = () => {
       setRoom(prev => ({
         ...prev,
         [name]: ['length', 'width', 'height', 'spotPercentage'].includes(name)
-          ? Number(value)
+          ? Number(value) || 0
           : value
       }));
     }
