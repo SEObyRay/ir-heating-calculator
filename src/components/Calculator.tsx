@@ -5,6 +5,7 @@ import { Room, CalculationResult, RoomType, InsulationType, Window, GlassType, H
 import { calculateHeating } from '../utils/calculator';
 import { downloadReport } from '../utils/reportGenerator';
 import { TOOLTIPS } from '../constants/tooltips';
+import './Calculator.css';
 
 const roomTypes: RoomType[] = ['living', 'bedroom', 'bathroom', 'kitchen', 'office', 'other'];
 const roomTypeLabels: Record<RoomType, string> = {
@@ -174,21 +175,23 @@ const Calculator: React.FC = () => {
   };
 
   const renderModeSelector = () => (
-    <div className="mode-selector">
-      <div 
+    <div className="mode-selector mb-8">
+      <button 
+        type="button"
         className={`mode-card ${calculationMode === 'simple' ? 'selected' : ''}`}
         onClick={() => handleModeSelect('simple')}
       >
         <h3>Snelle Berekening</h3>
         <p>Basis berekening met alleen de meest essentiële gegevens voor een snelle schatting.</p>
-      </div>
-      <div 
+      </button>
+      <button 
+        type="button"
         className={`mode-card ${calculationMode === 'advanced' ? 'selected' : ''}`}
         onClick={() => handleModeSelect('advanced')}
       >
         <h3>Uitgebreide Berekening</h3>
         <p>Gedetailleerde berekening met alle factoren voor de meest nauwkeurige schatting.</p>
-      </div>
+      </button>
     </div>
   );
 
