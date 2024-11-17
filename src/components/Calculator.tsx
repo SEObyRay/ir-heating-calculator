@@ -71,26 +71,6 @@ const emptyAdjacentSpaces: Record<'north' | 'east' | 'south' | 'west' | 'above' 
   below: 'outside'
 };
 
-const emptyRoom: Room = {
-  type: 'living',
-  length: 0,
-  width: 0,
-  height: 0,
-  insulation: 'average',
-  heatingType: 'full',
-  windows: [],
-  wallType: 'brick',
-  ceilingType: 'concrete',
-  floorType: 'concrete',
-  ventilationType: 'natural',
-  occupancy: {
-    numberOfPeople: 1,
-    hoursPerDay: 8
-  },
-  adjacentSpaces: emptyAdjacentSpaces,
-  spotPercentage: 30
-};
-
 const defaultRoom: Room = {
   length: 6,
   width: 4,
@@ -103,8 +83,18 @@ const defaultRoom: Room = {
   ceilingType: 'concrete',
   floorType: 'concrete',
   ventilationType: 'natural',
-  adjacentSpaces: emptyAdjacentSpaces,
-  occupancy: emptyOccupancy,
+  adjacentSpaces: {
+    north: 'outside',
+    east: 'outside',
+    south: 'outside',
+    west: 'outside',
+    above: 'outside',
+    below: 'outside'
+  },
+  occupancy: {
+    numberOfPeople: 1,
+    hoursPerDay: 8
+  },
   spotPercentage: 30
 };
 
@@ -131,39 +121,49 @@ const Calculator: React.FC = () => {
     try {
       setError('');
 
+      // Validate basic dimensions
       if (room.length <= 0 || room.width <= 0 || room.height <= 0) {
         setError('Alle afmetingen moeten groter zijn dan 0');
         return;
       }
 
-      const invalidWindows = room.windows.some(w => w.width <= 0 || w.height <= 0);
+      // Validate windows
+      const invalidWindows = room.windows.some(w => 
+        w.width <= 0 || 
+        w.height <= 0 || 
+        w.quantity < 1 || 
+        !w.orientation || 
+        !w.glassType
+      );
+      
       if (invalidWindows) {
-        setError('Alle raamafmetingen moeten groter zijn dan 0');
+        setError('Controleer de raamafmetingen en eigenschappen');
         return;
       }
 
-      if (room.heatingType === 'spot' && (room.spotPercentage || 0) <= 0) {
-        setError('Geef een geldig percentage op voor spot verwarming');
+      // Validate spot heating
+      if (room.heatingType === 'spot' && (!room.spotPercentage || room.spotPercentage <= 0 || room.spotPercentage > 100)) {
+        setError('Geef een geldig percentage op voor spot verwarming (1-100%)');
         return;
       }
 
+      // Calculate result
       const calculationResult = calculateHeating(room, calculationMode);
       setResult(calculationResult);
       
-      // Ensure the result section exists before trying to scroll
-      // Use setTimeout to ensure the DOM has updated with the new result
+      // Scroll to result
       setTimeout(() => {
         if (resultRef.current) {
           resultRef.current.scrollIntoView({ 
             behavior: 'smooth',
             block: 'start'
           });
-          // Set focus to the result section for accessibility
           resultRef.current.focus();
         }
       }, 100);
       
     } catch (err) {
+      console.error('Calculation error:', err);
       setError(err instanceof Error ? err.message : 'Er is een fout opgetreden bij het berekenen');
       setResult(null);
     }
@@ -199,32 +199,30 @@ const Calculator: React.FC = () => {
     const { name, value } = e.target;
     setError('');
 
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      if (parent === 'occupancy') {
-        setRoom(prev => ({
-          ...prev,
-          occupancy: {
-            ...prev.occupancy,
-            [child]: Math.max(1, Number(value) || 1)
-          }
-        }));
+    // Validate numeric inputs
+    if (['length', 'width', 'height', 'spotPercentage'].includes(name)) {
+      const numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue <= 0) {
+        setError(`${name} moet een positief getal zijn`);
+        return;
       }
-    } else {
-      setRoom(prev => ({
-        ...prev,
-        [name]: ['length', 'width', 'height', 'spotPercentage'].includes(name)
-          ? Math.max(0, Number(value) || 0)
-          : value
-      }));
+      if (name === 'spotPercentage' && (numValue < 1 || numValue > 100)) {
+        setError('Spot verwarming percentage moet tussen 1 en 100 zijn');
+        return;
+      }
     }
+
+    setRoom(prev => ({
+      ...prev,
+      [name]: name === 'spotPercentage' ? parseFloat(value) : value
+    }));
   };
 
   const handleAddWindow = () => {
-    setRoom({
-      ...room,
-      windows: [...room.windows, { ...defaultWindow }]
-    });
+    setRoom(prev => ({
+      ...prev,
+      windows: [...prev.windows, { ...defaultWindow }]
+    }));
   };
 
   const handleRemoveWindow = (index: number) => {
@@ -237,74 +235,105 @@ const Calculator: React.FC = () => {
   const handleWindowChange = (index: number, field: keyof Window, value: number | GlassType | Orientation | boolean) => {
     setRoom(prev => ({
       ...prev,
-      windows: prev.windows.map((window, i) => 
-        i === index ? { ...window, [field]: value } : window
-      )
+      windows: prev.windows.map((window, i) => {
+        if (i !== index) return window;
+        
+        // Handle numeric values
+        if (field === 'width' || field === 'height') {
+          const numValue = typeof value === 'number' ? value : parseFloat(value as string);
+          if (isNaN(numValue)) return window;
+          return { ...window, [field]: Math.max(0, numValue) };
+        }
+        
+        // Handle quantity
+        if (field === 'quantity') {
+          const numValue = typeof value === 'number' ? value : parseInt(value as string);
+          if (isNaN(numValue)) return window;
+          return { ...window, quantity: Math.max(1, numValue) };
+        }
+        
+        // Handle other fields
+        return { ...window, [field]: value };
+      })
     }));
   };
 
   const handleDuplicateWindow = (index: number) => {
     const windowToDuplicate = room.windows[index];
-    setRoom({
-      ...room,
-      windows: [...room.windows, { ...windowToDuplicate }]
-    });
+    if (!windowToDuplicate) return;
+    
+    setRoom(prev => ({
+      ...prev,
+      windows: [...prev.windows, { ...windowToDuplicate }]
+    }));
   };
 
   const renderBasicFields = () => (
-    <div className="form-grid">
-      <div>
-        <label htmlFor="length" className="form-label">Lengte (meters)</label>
-        <input
-          type="number"
-          id="length"
-          className="input-field"
-          value={room.length || ''}
-          onChange={(e) => setRoom({ ...room, length: parseFloat(e.target.value) })}
-          step="0.1"
-          min="0"
-          placeholder="bijv. 6.0"
-        />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Afmetingen */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Lengte (m) <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            name="length"
+            value={room.length || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            required
+            min="0.1"
+            step="0.1"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Breedte (m) <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            name="width"
+            value={room.width || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            required
+            min="0.1"
+            step="0.1"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Hoogte (m) <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            name="height"
+            value={room.height || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            required
+            min="0.1"
+            step="0.1"
+          />
+        </div>
       </div>
+
+      {/* Isolatie */}
       <div>
-        <label htmlFor="width" className="form-label">Breedte (meters)</label>
-        <input
-          type="number"
-          id="width"
-          className="input-field"
-          value={room.width || ''}
-          onChange={(e) => setRoom({ ...room, width: parseFloat(e.target.value) })}
-          step="0.1"
-          min="0"
-          placeholder="bijv. 4.0"
-        />
-      </div>
-      <div>
-        <label htmlFor="height" className="form-label">Hoogte (meters)</label>
-        <input
-          type="number"
-          id="height"
-          className="input-field"
-          value={room.height || ''}
-          onChange={(e) => setRoom({ ...room, height: parseFloat(e.target.value) })}
-          step="0.1"
-          min="0"
-          placeholder="bijv. 2.6"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Isolatie Kwaliteit
-          <InfoIcon tooltip={`${TOOLTIPS.insulation.description}\n\n${Object.values(TOOLTIPS.insulation.details).join('\n')}`} />
+        <label className="block text-sm font-medium text-gray-700">
+          Isolatie <span className="text-red-500">*</span>
         </label>
         <select
+          name="insulation"
           value={room.insulation}
-          onChange={(e) => setRoom({ ...room, insulation: e.target.value as InsulationType })}
+          onChange={handleInputChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          required
         >
-          {insulationTypes.map((quality) => (
-            <option key={quality} value={quality}>
-              {insulationLabels[quality]} - {TOOLTIPS.insulation.details[quality]}
+          {insulationTypes.map(type => (
+            <option key={type} value={type}>
+              {insulationLabels[type]}
             </option>
           ))}
         </select>
@@ -645,11 +674,18 @@ const Calculator: React.FC = () => {
 
           {/* Download rapport knop */}
           <button
-            onClick={() => downloadReport(room, result, calculationMode)}
+            onClick={() => downloadReport(room, result)}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Download Rapport
           </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded" role="alert">
+          <p className="font-medium">Fout:</p>
+          <p>{error}</p>
         </div>
       )}
 
@@ -672,11 +708,6 @@ const Calculator: React.FC = () => {
         </div>
       </form>
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
     </div>
   );
 }

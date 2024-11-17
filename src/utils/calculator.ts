@@ -1,258 +1,202 @@
-import { Room, CalculationResult, Window, CalculationMode } from '../types/calculator';
+import { Room, CalculationResult, Window, CalculationMode, HeatingType } from '../types/calculator';
 
-// Constanten voor berekeningen
-const BASE_WATTAGE_PER_M3 = 30; // Basis wattage per kubieke meter
+// Constants for calculations
+const BASE_WATTAGE_PER_M3_MAIN = 30; // Base wattage per cubic meter for main heating
+const BASE_WATTAGE_PER_M2_SUPPLEMENTARY = 120; // Base wattage per square meter for supplementary heating
+const EXTRA_AREA_MARGIN = 0.5; // Extra margin in meters for supplementary heating area
 
-// Isolatie factoren
+// Insulation factors
 const INSULATION_FACTORS = {
-  poor: 1.4,      // Slechte isolatie heeft 40% meer warmteverlies
-  average: 1.2,  // Gemiddelde isolatie heeft 20% meer warmteverlies
-  good: 1.0,     // Goede isolatie heeft geen extra warmteverlies
-  excellent: 0.8 // Uitstekende isolatie heeft 20% minder warmteverlies
+  poor: 1.4,      // Poor insulation has 40% more heat loss
+  average: 1.2,   // Average insulation has 20% more heat loss
+  good: 1.0,      // Good insulation has no extra heat loss
+  excellent: 0.8  // Excellent insulation has 20% less heat loss
 };
 
-// Glas type factoren
+// Glass type factors
 const GLASS_FACTORS = {
-  single: 1.5,    // Enkel glas heeft 50% meer warmteverlies
-  double: 1.2,    // Dubbel glas heeft 20% meer warmteverlies
-  hr: 1.1,        // HR glas heeft 10% meer warmteverlies
-  'hr+': 1.0,     // HR+ glas heeft geen extra warmteverlies
-  'hr++': 0.9,    // HR++ glas heeft 10% minder warmteverlies
-  triple: 0.8     // Triple glas heeft 20% minder warmteverlies
+  single: 1.5,    // Single glass has 50% more heat loss
+  double: 1.2,    // Double glass has 20% more heat loss
+  hr: 1.1,        // HR glass has 10% more heat loss
+  'hr+': 1.0,     // HR+ glass has no extra heat loss
+  'hr++': 0.9,    // HR++ glass has 10% less heat loss
+  triple: 0.8     // Triple glass has 20% less heat loss
 };
 
-// Materiaal factoren
-const WALL_FACTORS = {
-  brick: 1.0,     // Baksteen heeft geen extra warmteverlies
-  concrete: 1.1, // Beton heeft 10% meer warmteverlies
-  wood: 0.9,      // Hout heeft 10% minder warmteverlies
-  steel: 1.2      // Staal heeft 20% meer warmteverlies
-};
+function validateInput(room: Room, mode: CalculationMode): void {
+  // Basic validation
+  if (!room.length || room.length <= 0) throw new Error('Lengte moet groter zijn dan 0');
+  if (!room.width || room.width <= 0) throw new Error('Breedte moet groter zijn dan 0');
+  if (!room.height || room.height <= 0) throw new Error('Hoogte moet groter zijn dan 0');
+  if (!room.insulation) throw new Error('Selecteer een isolatie type');
+  if (!room.heatingType) throw new Error('Selecteer het type verwarming (hoofd of bijverwarming)');
 
-const CEILING_FACTORS = {
-  concrete: 1.1,      // Betonnen plafond heeft 10% meer warmteverlies
-  wood: 0.9,         // Houten plafond heeft 10% minder warmteverlies
-  insulated: 0.8,    // Geïsoleerd plafond heeft 20% minder warmteverlies
-  uninsulated: 1.3   // Ongeïsoleerd plafond heeft 30% meer warmteverlies
-};
+  // Validate spot heating percentage for supplementary heating
+  if (room.heatingType === 'spot' && (!room.spotPercentage || room.spotPercentage < 1 || room.spotPercentage > 100)) {
+    throw new Error('Spot verwarming percentage moet tussen 1 en 100 zijn');
+  }
 
-const FLOOR_FACTORS = {
-  concrete: 1.1,  // Betonnen vloer heeft 10% meer warmteverlies
-  wood: 0.9,     // Houten vloer heeft 10% minder warmteverlies
-  tile: 1.2,      // Tegelvloer heeft 20% meer warmteverlies
-  carpet: 0.8    // Tapijt heeft 20% minder warmteverlies
-};
-
-const VENTILATION_FACTORS = {
-  natural: 1.1,    // Natuurlijke ventilatie heeft 10% meer warmteverlies
-  mechanical: 1.0, // Mechanische ventilatie heeft geen extra warmteverlies
-  balanced: 0.9,   // Gebalanceerde ventilatie heeft 10% minder warmteverlies
-  none: 1.2       // Geen ventilatie heeft 20% meer warmteverlies (vocht!)
-};
-
-const ORIENTATION_FACTORS = {
-  north: 1.2,    // Noord heeft 20% meer warmteverlies (minste zonlicht)
-  east: 1.1,     // Oost heeft 10% meer warmteverlies
-  south: 0.9,    // Zuid heeft 10% minder warmteverlies (meeste zonlicht)
-  west: 1.0      // West is neutraal
-};
-
-export function calculateHeating(room: Room, mode: CalculationMode): CalculationResult {
-  try {
-    // Basis berekening
-    const volume = room.length * room.width * room.height;
-    let requiredWattage = volume * BASE_WATTAGE_PER_M3;
-
-    // Pas isolatie factor toe
-    requiredWattage *= INSULATION_FACTORS[room.insulation];
-
-    if (mode === 'advanced') {
-      // Pas materiaal factoren toe
-      requiredWattage *= WALL_FACTORS[room.wallType];
-      requiredWattage *= CEILING_FACTORS[room.ceilingType];
-      requiredWattage *= FLOOR_FACTORS[room.floorType];
-      
-      // Pas ventilatie factor toe
-      requiredWattage *= VENTILATION_FACTORS[room.ventilationType];
-
-      // Bereken raam verliezen
-      if (room.windows.length > 0) {
-        const calculateWindowHeatLoss = (windows: Window[]): number => {
-          return windows.reduce((total, window) => {
-            const area = window.width * window.height * (window.quantity || 1);  // Multiply by quantity
-            const glassLossFactor = GLASS_FACTORS[window.glassType];
-            const orientationFactor = ORIENTATION_FACTORS[window.orientation];
-            const blindsFactor = window.hasBlinds ? 0.85 : 1;
-            
-            return total + (area * glassLossFactor * orientationFactor * blindsFactor);
-          }, 0);
-        };
-
-        const totalWindowHeatLoss = calculateWindowHeatLoss(room.windows);
-
-        // Voeg 10% toe voor elk 10% raamoppervlak t.o.v. vloeroppervlak
-        const floorArea = room.length * room.width;
-        const windowPercentage = (totalWindowHeatLoss / floorArea) * 100;
-        requiredWattage *= (1 + (windowPercentage / 100));
-      }
+  // Advanced mode validation
+  if (mode === 'advanced') {
+    if (room.windows) {
+      room.windows.forEach((window, index) => {
+        if (!window.width || window.width <= 0) throw new Error(`Raam ${index + 1}: Breedte moet groter zijn dan 0`);
+        if (!window.height || window.height <= 0) throw new Error(`Raam ${index + 1}: Hoogte moet groter zijn dan 0`);
+        if (!window.quantity || window.quantity < 1) throw new Error(`Raam ${index + 1}: Aantal moet minimaal 1 zijn`);
+        if (!window.glassType) throw new Error(`Raam ${index + 1}: Selecteer een glas type`);
+        if (!window.orientation) throw new Error(`Raam ${index + 1}: Selecteer een oriëntatie`);
+      });
     }
-
-    // Pas spot verwarming percentage toe indien van toepassing
-    if (room.heatingType === 'spot') {
-      requiredWattage *= (room.spotPercentage / 100);
-    }
-
-    // Rond af naar boven op 100W
-    requiredWattage = Math.ceil(requiredWattage / 100) * 100;
-
-    // Genereer panel suggesties
-    const panelSuggestions = generatePanelSuggestions(requiredWattage);
-
-    return {
-      requiredWattage,
-      panelSuggestions,
-      energyEfficiency: calculateEnergyEfficiency(room, mode)
-    };
-  } catch (error) {
-    console.error('Error in heating calculation:', error);
-    throw new Error('Er is een fout opgetreden bij de berekening');
   }
 }
 
-function generatePanelSuggestions(totalWattage: number): string[] {
+function calculateMainHeating(room: Room, mode: CalculationMode): number {
+  // Calculate basic volume and wattage
+  const volume = room.length * room.width * room.height;
+  let requiredWattage = volume * BASE_WATTAGE_PER_M3_MAIN;
+
+  // Apply insulation factor
+  requiredWattage *= INSULATION_FACTORS[room.insulation];
+
+  // Calculate window heat loss if in advanced mode
+  if (mode === 'advanced' && room.windows && room.windows.length > 0) {
+    const totalWindowArea = room.windows.reduce((total, window) => {
+      const area = window.width * window.height * window.quantity;
+      const glassLossFactor = GLASS_FACTORS[window.glassType];
+      return total + (area * glassLossFactor);
+    }, 0);
+
+    // Add additional wattage for window heat loss
+    const floorArea = room.length * room.width;
+    const windowPercentage = (totalWindowArea / floorArea) * 100;
+    requiredWattage *= (1 + (windowPercentage / 100));
+  }
+
+  return requiredWattage;
+}
+
+function calculateSupplementaryHeating(room: Room): number {
+  // Add margin to the heating area
+  const lengthWithMargin = room.length + (2 * EXTRA_AREA_MARGIN);
+  const widthWithMargin = room.width + (2 * EXTRA_AREA_MARGIN);
+  const area = lengthWithMargin * widthWithMargin;
+
+  // Calculate base wattage for supplementary heating
+  let requiredWattage = area * BASE_WATTAGE_PER_M2_SUPPLEMENTARY;
+
+  // Apply spot heating percentage if specified
+  if (room.heatingType === 'spot' && room.spotPercentage) {
+    requiredWattage *= (room.spotPercentage / 100);
+  }
+
+  return requiredWattage;
+}
+
+function generatePanelSuggestions(totalWattage: number, heatingType: HeatingType): string[] {
   const suggestions: string[] = [];
   const standardPanels = [350, 580, 700, 1000];
-  
-  // Voeg suggestie toe voor één type paneel
-  const singlePanelType = standardPanels.reduce((prev, curr) => {
-    return Math.abs(curr - totalWattage/2) < Math.abs(prev - totalWattage/2) ? curr : prev;
-  });
-  const panelCount = Math.ceil(totalWattage / singlePanelType);
-  suggestions.push(`${panelCount}x ${singlePanelType}W panelen (totaal ${panelCount * singlePanelType}W)`);
 
-  // Voeg suggestie toe voor combinatie van panelen
-  if (totalWattage > 1000) {
-    const largePanelCount = Math.floor(totalWattage / 1000);
-    const remainingWattage = totalWattage - (largePanelCount * 1000);
-    if (remainingWattage > 0) {
-      const smallPanelType = standardPanels.reduce((prev, curr) => {
-        return Math.abs(curr - remainingWattage) < Math.abs(prev - remainingWattage) ? curr : prev;
-      });
-      suggestions.push(`${largePanelCount}x 1000W + 1x ${smallPanelType}W panelen (totaal ${largePanelCount * 1000 + smallPanelType}W)`);
+  // For supplementary heating, prefer smaller panels
+  if (heatingType === 'spot') {
+    const recommendedPanels = standardPanels.filter(w => w <= 700);
+    const bestMatch = recommendedPanels.reduce((prev, curr) => 
+      Math.abs(curr - totalWattage) < Math.abs(prev - totalWattage) ? curr : prev
+    );
+    suggestions.push(`${bestMatch}W paneel (ideaal voor bijverwarming)`);
+    
+    if (totalWattage > bestMatch) {
+      suggestions.push(`2x ${bestMatch}W panelen voor betere warmteverdeling`);
     }
+    
+    suggestions.push('Tip: Gebruik een slimme stekker of schakelaar voor automatische bediening');
+    suggestions.push('Tip: Houd rekening met 30 minuten opwarmtijd');
+  } else {
+    // For main heating, calculate optimal panel combination
+    const optimalPanel = standardPanels.reduce((prev, curr) => 
+      Math.abs(curr - totalWattage/2) < Math.abs(prev - totalWattage/2) ? curr : prev
+    );
+    const panelCount = Math.ceil(totalWattage / optimalPanel);
+    suggestions.push(`${panelCount}x ${optimalPanel}W panelen (totaal ${panelCount * optimalPanel}W)`);
+    suggestions.push('Tip: Verwarmingstijd ongeveer 3 graden per uur');
   }
 
   return suggestions;
 }
 
-function calculateEnergyEfficiency(room: Room, mode: CalculationMode): { rating: string, savingsPotential: number } {
+function calculateEnergyEfficiency(room: Room, mode: CalculationMode): { rating: string; savingsPotential: number } {
   let points = 0;
-  const maxPoints = mode === 'advanced' ? 15 : 4;
+  const maxPoints = mode === 'advanced' ? 10 : 5;
 
-  // Basis punten voor isolatie (max 4)
+  // Basic points for insulation
   switch (room.insulation) {
-    case 'excellent': points += 4; break;
-    case 'good': points += 3; break;
+    case 'excellent': points += 5; break;
+    case 'good': points += 4; break;
     case 'average': points += 2; break;
     case 'poor': points += 1; break;
   }
 
-  if (mode === 'advanced') {
-    // Ventilatie (max 2)
-    switch (room.ventilationType) {
-      case 'balanced': points += 2; break;
-      case 'mechanical': points += 1.5; break;
-      case 'natural': points += 1; break;
-      case 'none': points += 0; break;
-    }
-
-    // Plafond type (max 2)
-    switch (room.ceilingType) {
-      case 'insulated': points += 2; break;
-      case 'wood': points += 1.5; break;
-      case 'concrete': points += 1; break;
-      case 'uninsulated': points += 0; break;
-    }
-
-    // Vloer type (max 2)
-    switch (room.floorType) {
-      case 'carpet': points += 2; break;
-      case 'wood': points += 1.5; break;
-      case 'concrete': points += 1; break;
-      case 'tile': points += 0.5; break;
-    }
-
-    // Muur type (max 2)
-    switch (room.wallType) {
-      case 'wood': points += 2; break;
-      case 'brick': points += 1.5; break;
-      case 'concrete': points += 1; break;
-      case 'steel': points += 0.5; break;
-    }
-
-    // Ramen (max 3)
-    if (room.windows.length > 0) {
-      let windowPoints = 0;
-      room.windows.forEach(window => {
-        // Glas type (max 1.5)
-        switch (window.glassType) {
-          case 'triple': windowPoints += 1.5; break;
-          case 'hr++': windowPoints += 1.2; break;
-          case 'hr+': windowPoints += 1; break;
-          case 'hr': windowPoints += 0.8; break;
-          case 'double': windowPoints += 0.5; break;
-          case 'single': windowPoints += 0; break;
-        }
-
-        // Zonwering (max 0.5)
-        if (window.hasBlinds) windowPoints += 0.5;
-
-        // Oriëntatie (max 1)
-        switch (window.orientation) {
-          case 'south': windowPoints += 1; break;
-          case 'east': case 'west': windowPoints += 0.5; break;
-          case 'north': windowPoints += 0; break;
-        }
-      });
-
-      // Gemiddelde van alle ramen
-      points += (windowPoints / room.windows.length);
-    }
+  // Additional points for advanced features
+  if (mode === 'advanced' && room.windows) {
+    const hasEfficientGlass = room.windows.some(w => 
+      ['hr++', 'triple'].includes(w.glassType)
+    );
+    if (hasEfficientGlass) points += 3;
+    
+    const hasBlinds = room.windows.some(w => w.hasBlinds);
+    if (hasBlinds) points += 2;
   }
 
-  // Bereken rating en besparingspotentieel
+  // Calculate rating and savings potential
   const percentage = (points / maxPoints) * 100;
   let rating: string;
   let savingsPotential: number;
 
   if (percentage >= 90) {
-    rating = 'A+++';
+    rating = 'A+';
     savingsPotential = 0;
   } else if (percentage >= 80) {
-    rating = 'A++';
-    savingsPotential = 5;
-  } else if (percentage >= 70) {
-    rating = 'A+';
-    savingsPotential = 10;
-  } else if (percentage >= 60) {
     rating = 'A';
-    savingsPotential = 15;
-  } else if (percentage >= 50) {
+    savingsPotential = 10;
+  } else if (percentage >= 70) {
     rating = 'B';
     savingsPotential = 20;
-  } else if (percentage >= 40) {
+  } else if (percentage >= 60) {
     rating = 'C';
-    savingsPotential = 25;
-  } else if (percentage >= 30) {
-    rating = 'D';
     savingsPotential = 30;
-  } else if (percentage >= 20) {
-    rating = 'E';
-    savingsPotential = 35;
   } else {
-    rating = 'F';
+    rating = 'D';
     savingsPotential = 40;
   }
 
   return { rating, savingsPotential };
+}
+
+export function calculateHeating(room: Room, mode: CalculationMode): CalculationResult {
+  try {
+    // Validate input
+    validateInput(room, mode);
+
+    // Calculate required wattage based on heating type
+    const requiredWattage = room.heatingType === 'full' 
+      ? calculateMainHeating(room, mode)
+      : calculateSupplementaryHeating(room);
+
+    // Round up to nearest 100W
+    const roundedWattage = Math.ceil(requiredWattage / 100) * 100;
+
+    // Generate panel suggestions
+    const panelSuggestions = generatePanelSuggestions(roundedWattage, room.heatingType);
+
+    // Calculate energy efficiency
+    const energyEfficiency = calculateEnergyEfficiency(room, mode);
+
+    return {
+      requiredWattage: roundedWattage,
+      panelSuggestions,
+      energyEfficiency,
+    };
+  } catch (error) {
+    console.error('Error in heating calculation:', error);
+    throw error instanceof Error ? error : new Error('Er is een fout opgetreden bij het berekenen');
+  }
 }

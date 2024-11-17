@@ -14,7 +14,7 @@ export interface Window {
   width: number;
   height: number;
   glassType: GlassType;
-  orientation?: Orientation;
+  orientation: Orientation;
   hasBlinds?: boolean;
   quantity: number;
 }
@@ -32,13 +32,13 @@ export interface Room {
   ceilingType: CeilingType;
   floorType: FloorType;
   ventilationType: VentilationType;
-  adjacentSpaces?: {
-    north?: AdjacentSpaceType;
-    east?: AdjacentSpaceType;
-    south?: AdjacentSpaceType;
-    west?: AdjacentSpaceType;
-    above?: AdjacentSpaceType;
-    below?: AdjacentSpaceType;
+  adjacentSpaces: {
+    north: AdjacentSpaceType;
+    east: AdjacentSpaceType;
+    south: AdjacentSpaceType;
+    west: AdjacentSpaceType;
+    above: AdjacentSpaceType;
+    below: AdjacentSpaceType;
   };
   occupancy: {
     numberOfPeople: number;
@@ -48,15 +48,9 @@ export interface Room {
 
 export interface CalculationResult {
   requiredWattage: number;
-  recommendations: string[];
+  panelSuggestions: string[];
   energyEfficiency: {
-    rating: 'A' | 'B' | 'C' | 'D' | 'E';
+    rating: string;
     savingsPotential: number;
   };
-  panelSuggestions: {
-    type: string;
-    count: number;
-    totalWattage: number;
-    coverage: number;
-  }[];
 }
