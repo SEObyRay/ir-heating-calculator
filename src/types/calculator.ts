@@ -1,7 +1,7 @@
 export type RoomType = 'living' | 'bedroom' | 'bathroom' | 'kitchen' | 'office' | 'other';
-export type InsulationType = 'poor' | 'medium' | 'good';
-export type PanelType = 'fixed' | 'mobile';
-export type MountingType = 'wall' | 'ceiling';
+export type InsulationType = 'poor' | 'good' | 'excellent';
+export type PanelType = 'standard' | 'premium';
+export type MountingType = 'wall' | 'ceiling' | 'mobile';
 export type HeatingMode = 'full' | 'spot';
 export type GlassType = 'single' | 'double' | 'hr' | 'hr+' | 'hr++' | 'triple';
 export type Orientation = 'north' | 'east' | 'south' | 'west';
@@ -24,17 +24,17 @@ export interface Room {
   width: number;
   height: number;
   insulation: InsulationType;
-  panelType: PanelType;
   mountingType: MountingType;
+  panelType: PanelType;
 }
 
 export interface CalculationResult {
   volume: number;
   recommendedPower: number;
-  recommendations: string[];
   verbruikPerUur: number;
   kostenPerUur: number;
   kostenPerDag: number;
   kostenPerMaand: number;
   stroomprijs: number;
+  recommendations: string[];
 }

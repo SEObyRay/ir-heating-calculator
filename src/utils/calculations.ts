@@ -1,62 +1,54 @@
-import { Room, CalculationResult, PanelType, MountingType } from '../types/calculator';
-import { haalStroomprijsOp } from '../services/energyPrices';
+import { Room, CalculationResult } from '../types/calculator';
 
-// Constants for heating calculations
-const FIXED_WATTS_PER_CUBIC_METER = 60;  // Voor vaste panelen
-const MOBILE_WATTS_PER_CUBIC_METER = 40; // Voor mobiele panelen
-const MAX_MOBILE_VOLUME = 18;            // Maximum volume voor mobiele panelen in m³
-const GEBRUIKSUREN_PER_DAG = 8;         // Gemiddeld aantal gebruiksuren per dag
-const DAGEN_PER_MAAND = 30;
-
-// Insulation factors (multipliers)
-const INSULATION_FACTORS = {
-  poor: 1.2,    // Slecht geïsoleerd (voor 1990)
-  medium: 1.0,  // Gemiddeld geïsoleerd (1990-2010)
-  good: 0.8     // Goed geïsoleerd (na 2010 of gerenoveerd)
+const WATTS_PER_CUBIC_METER = {
+  poor: 60,
+  good: 45,
+  excellent: 35
 };
 
-// Mounting multipliers
-const MOUNTING_MULTIPLIERS = {
-  ceiling: 1.0,
-  wall: 1.1,
-  freeStanding: 1.2
+const MOUNTING_EFFICIENCY = {
+  wall: 1.0,
+  ceiling: 0.9,
+  mobile: 0.8
 };
 
-export function calculateHeating(room: Room): CalculationResult {
+const PANEL_EFFICIENCY = {
+  standard: 1.0,
+  premium: 1.2
+};
+
+export function calculateHeatingRequirements(room: Room): CalculationResult {
   const volume = room.length * room.width * room.height;
+  const baseWattage = volume * WATTS_PER_CUBIC_METER[room.insulation];
   
-  // Basis vermogen berekening (40-60W per m³)
-  let basePower = volume * 50;
-
-  // Aanpassingen op basis van isolatie
-  const insulationMultiplier = INSULATION_FACTORS[room.insulation];
-
-  // Aanpassingen op basis van montage
-  const mountingMultiplier = MOUNTING_MULTIPLIERS[room.mountingType];
-
-  const calculatedPower = basePower * insulationMultiplier * mountingMultiplier;
-
-  // Rond het vermogen af naar boven op honderdtallen voor praktische paneel-selectie
-  const recommendedPower = Math.ceil(calculatedPower / 100) * 100;
-
-  // Verbruik en kosten berekeningen
-  const stroomprijs = haalStroomprijsOp().prijs;
-  const verbruikPerUur = recommendedPower / 1000; // conversie van W naar kW
+  // Apply mounting and panel efficiency factors
+  const mountingFactor = MOUNTING_EFFICIENCY[room.mountingType];
+  const panelFactor = PANEL_EFFICIENCY[room.panelType];
+  
+  const recommendedPower = Math.ceil(baseWattage * mountingFactor * panelFactor);
+  
+  // Calculate energy consumption and costs
+  const stroomprijs = 0.40; // €/kWh
+  const verbruikPerUur = recommendedPower / 1000; // Convert W to kW
   const kostenPerUur = verbruikPerUur * stroomprijs;
-  const kostenPerDag = kostenPerUur * GEBRUIKSUREN_PER_DAG;
-  const kostenPerMaand = kostenPerDag * DAGEN_PER_MAAND;
+  const kostenPerDag = kostenPerUur * 8; // Assuming 8 hours of use per day
+  const kostenPerMaand = kostenPerDag * 30;
 
-  // Genereer aanbevelingen
-  const recommendations = generateRecommendations(
-    recommendedPower,
-    room.insulation,
-    room.mountingType,
-    kostenPerMaand
-  );
+  // Generate recommendations
+  const recommendations: string[] = [];
+  
+  recommendations.push(`Voor een ruimte van ${volume.toFixed(1)} m³ adviseren wij ${recommendedPower} Watt aan infrarood verwarming.`);
+  
+  if (room.insulation === 'poor') {
+    recommendations.push('Overweeg het verbeteren van de isolatie voor een efficiënter systeem.');
+  }
+  
+  if (room.mountingType === 'mobile') {
+    recommendations.push('Een vast gemonteerd paneel is meestal efficiënter dan een mobiele oplossing.');
+  }
 
   return {
-    volume: Math.round(volume * 10) / 10,
-    calculatedPower: Math.round(calculatedPower),
+    volume,
     recommendedPower,
     verbruikPerUur,
     kostenPerUur,
@@ -66,46 +58,3 @@ export function calculateHeating(room: Room): CalculationResult {
     recommendations
   };
 }
-
-const generateRecommendations = (
-  power: number,
-  insulation: string,
-  mountingType: string,
-  kostenPerMaand: number
-): string[] => {
-  const recommendations: string[] = [];
-
-  // Paneel aanbevelingen
-  if (power <= 1000) {
-    recommendations.push(`Een ${power}W infrarood paneel zou voldoende moeten zijn.`);
-  } else {
-    const numberOfPanels = Math.ceil(power / 1000);
-    recommendations.push(
-      `We raden aan om ${numberOfPanels} panelen van 1000W te gebruiken voor optimale warmteverdeling.`
-    );
-  }
-
-  // Isolatie aanbevelingen
-  if (insulation === 'poor') {
-    recommendations.push(
-      'Overweeg om de isolatie te verbeteren. Dit kan uw energiekosten met tot wel 30% verlagen.'
-    );
-  }
-
-  // Montage aanbevelingen
-  if (mountingType === 'freeStanding') {
-    recommendations.push(
-      'Een plafond- of wandmontage is efficiënter dan vrijstaande panelen.'
-    );
-  }
-
-  // Kosten advies
-  recommendations.push(
-    `De geschatte maandelijkse kosten zijn ${new Intl.NumberFormat('nl-NL', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(kostenPerMaand)} bij ${GEBRUIKSUREN_PER_DAG} uur gebruik per dag.`
-  );
-
-  return recommendations;
-};

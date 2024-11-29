@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Room, CalculationResult, RoomType, InsulationType, Window } from './types/calculator'
+import { Room, CalculationResult, RoomType, InsulationType, Window, MountingType, PanelType } from './types/calculator'
 import { calculateHeating } from './utils/calculations'
 import { TOOLTIPS } from './constants/tooltips'
 import { getMockStroomprijsData, haalStroomprijsOp } from './services/energyPrices';
@@ -38,6 +38,21 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, defaultOpen = fa
   );
 };
 
+const insulationLabels: Record<InsulationType, string> = {
+  poor: 'Slecht',
+  good: 'Goed',
+  excellent: 'Uitstekend'
+};
+
+const initialRoom: Room = {
+  length: 0,
+  width: 0,
+  height: 0,
+  insulation: 'good',
+  mountingType: 'wall',
+  panelType: 'standard'
+};
+
 const roomTypeLabels: Record<RoomType, string> = {
   living: 'Woonkamer',
   bedroom: 'Slaapkamer',
@@ -45,40 +60,6 @@ const roomTypeLabels: Record<RoomType, string> = {
   kitchen: 'Keuken',
   office: 'Kantoor',
   other: 'Anders'
-}
-
-const insulationLabels: Record<InsulationType, string> = {
-  poor: 'Slecht',
-  average: 'Gemiddeld',
-  good: 'Goed',
-  excellent: 'Uitstekend'
-}
-
-const defaultRoom: Room = {
-  length: 0,
-  width: 0,
-  height: 0,
-  type: 'living',
-  insulation: 'average',
-  heatingType: 'full',
-  windows: [],
-  wallType: 'brick',
-  ceilingType: 'concrete',
-  floorType: 'concrete',
-  ventilationType: 'natural',
-  adjacentSpaces: {
-    north: 'heated',
-    east: 'heated',
-    south: 'heated',
-    west: 'heated',
-    above: 'heated',
-    below: 'heated'
-  },
-  occupancy: {
-    numberOfPeople: 2.2,
-    hoursPerDay: 14
-  },
-  spotPercentage: 100
 }
 
 function InfoIcon({ tooltip }: { tooltip: string }) {
@@ -96,8 +77,8 @@ function App() {
     length: 5.0,    // Gemiddelde woonkamer lengte
     width: 4.0,     // Gemiddelde woonkamer breedte
     height: 2.6,    // Standaard plafondhoogte
-    insulation: 'medium', // Gemiddelde isolatie (1990-2010 bouw)
-    panelType: 'fixed',  // Meest voorkomende type
+    insulation: 'good', // Gemiddelde isolatie (1990-2010 bouw)
+    panelType: 'standard',  // Meest voorkomende type
     mountingType: 'wall' // Meest praktische montage
   });
 
@@ -176,7 +157,7 @@ function App() {
   }
 
   const handleReset = () => {
-    setRoom(defaultRoom)
+    setRoom(initialRoom)
     setResult(null)
     setError('')
   }
@@ -253,19 +234,19 @@ function App() {
                 <input
                   type="radio"
                   name="panelType"
-                  value="fixed"
-                  checked={room.panelType === 'fixed'}
+                  value="standard"
+                  checked={room.panelType === 'standard'}
                   onChange={(e) => {
                     handleInputChange(e);
                     // Herstel montage type naar 'wall' als we terug naar vast paneel gaan
-                    if (e.target.value === 'fixed') {
+                    if (e.target.value === 'standard') {
                       setRoom(prev => ({ ...prev, mountingType: 'wall' }));
                     }
                   }}
                   className="peer sr-only"
                 />
                 <div className="p-3 rounded-lg border border-gray-200 bg-white hover:bg-orange-50 transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50">
-                  <div className="font-medium text-gray-900">Vast Paneel</div>
+                  <div className="font-medium text-gray-900">Standaard Paneel</div>
                   <div className="text-sm text-gray-500 mt-1">Permanent gemonteerd</div>
                 </div>
               </label>
@@ -274,26 +255,26 @@ function App() {
                 <input
                   type="radio"
                   name="panelType"
-                  value="mobile"
-                  checked={room.panelType === 'mobile'}
+                  value="premium"
+                  checked={room.panelType === 'premium'}
                   onChange={(e) => {
                     handleInputChange(e);
                     // Reset montage type bij mobiel paneel
-                    if (e.target.value === 'mobile') {
+                    if (e.target.value === 'premium') {
                       setRoom(prev => ({ ...prev, mountingType: 'mobile' }));
                     }
                   }}
                   className="peer sr-only"
                 />
                 <div className="p-3 rounded-lg border border-gray-200 bg-white hover:bg-orange-50 transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50">
-                  <div className="font-medium text-gray-900">Mobiel Paneel</div>
+                  <div className="font-medium text-gray-900">Premium Paneel</div>
                   <div className="text-sm text-gray-500 mt-1">Verplaatsbaar</div>
                 </div>
               </label>
             </div>
           </Accordion>
 
-          {room.panelType === 'fixed' && (
+          {room.panelType === 'standard' && (
             <Accordion title="Montage" defaultOpen={true}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="relative cursor-pointer">
@@ -349,13 +330,13 @@ function App() {
                 <input
                   type="radio"
                   name="insulation"
-                  value="medium"
-                  checked={room.insulation === 'medium'}
+                  value="good"
+                  checked={room.insulation === 'good'}
                   onChange={handleInputChange}
                   className="peer sr-only"
                 />
                 <div className="p-3 rounded-lg border border-gray-200 bg-white hover:bg-orange-50 transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50">
-                  <div className="font-medium text-gray-900">Gemiddeld geïsoleerd</div>
+                  <div className="font-medium text-gray-900">Goed geïsoleerd</div>
                   <div className="text-sm text-gray-500 mt-1">Dubbel glas, basis isolatie (1975-2000)</div>
                 </div>
               </label>
@@ -364,13 +345,13 @@ function App() {
                 <input
                   type="radio"
                   name="insulation"
-                  value="good"
-                  checked={room.insulation === 'good'}
+                  value="excellent"
+                  checked={room.insulation === 'excellent'}
                   onChange={handleInputChange}
                   className="peer sr-only"
                 />
                 <div className="p-3 rounded-lg border border-gray-200 bg-white hover:bg-orange-50 transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50">
-                  <div className="font-medium text-gray-900">Goed geïsoleerd</div>
+                  <div className="font-medium text-gray-900">Uitstekend geïsoleerd</div>
                   <div className="text-sm text-gray-500 mt-1">HR++ glas, moderne isolatie (na 2000)</div>
                 </div>
               </label>
