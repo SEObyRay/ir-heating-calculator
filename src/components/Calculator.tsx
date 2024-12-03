@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useState, Suspense, useEffect } from 'react';
+import React, { useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { useStroomprijs } from '../context/StroomprijsContext';
-import { haalStroomprijsOp, haalStroomprijsOpSync } from '../services/energyPrices';
 
 const faqSchema = {
   "@context": "https://schema.org",
