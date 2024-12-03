@@ -1,243 +1,114 @@
-import { Room, CalculationResult, CalculationMode } from '../types/calculator';
+import { Room, CalculationResult } from '../types/calculator';
 
-const WATTAGE_PER_CUBIC_METER = {
-  living: {
-    poor: 45,
-    average: 40,
-    good: 35,
-    excellent: 30
-  },
-  bedroom: {
-    poor: 40,
-    average: 35,
-    good: 30,
-    excellent: 25
-  },
-  bathroom: {
-    poor: 50,
-    average: 45,
-    good: 40,
-    excellent: 35
-  },
-  kitchen: {
-    poor: 45,
-    average: 40,
-    good: 35,
-    excellent: 30
-  },
-  office: {
-    poor: 40,
-    average: 35,
-    good: 30,
-    excellent: 25
-  },
-  other: {
-    poor: 45,
-    average: 40,
-    good: 35,
-    excellent: 30
-  }
+// Constants for calculations
+const WATTS_PER_CUBIC_METER = {
+  poor: 45,
+  average: 40, // Standard Dutch recommendation
+  good: 35,
+  excellent: 30
 };
 
-const GLASS_FACTORS = {
-  single: 1.2,
-  double: 1.1,
-  hr: 1.05,
-  'hr+': 1.03,
-  'hr++': 1.02,
-  triple: 1.01
-};
+const WATTS_PER_SQUARE_METER = 40; // Dutch standard for full room heating
 
-const ORIENTATION_FACTORS = {
-  north: 1.1,
-  east: 1.05,
-  south: 1.0,
-  west: 1.05
-};
+const STANDARD_PANEL_OPTIONS = [
+  { wattage: 350, maxVolume: 9, description: 'Geschikt voor ca. 9 m³, ideaal als elektrische bureau verwarming of voor een klein toilet.' },
+  { wattage: 450, maxVolume: 12, description: 'Geschikt voor ca. 12 m³, perfect voor een kleine slaapkamer of bijkeuken.' },
+  { wattage: 580, maxVolume: 15, description: 'Geschikt voor ca. 15 m³, ideaal voor een woonkamer of keuken.' },
+  { wattage: 700, maxVolume: 18, description: 'Geschikt voor ca. 18 m³, ideaal als infrarood verwarming woonkamer.' }
+];
 
-const WALL_FACTORS = {
-  brick: 1.0,
-  concrete: 1.1,
-  wood: 1.2
-};
-
-const ADJACENT_SPACE_FACTORS = {
-  heated: 0.9,
-  unheated: 1.1,
-  outside: 1.2
-};
-
-const MATERIAL_FACTORS = {
-  brick: 1.0,
-  concrete: 1.2,
-  wood: 0.8
-};
-
-const VENTILATION_FACTORS = {
-  natural: 1.0,
-  mechanical: 0.9
-};
-
-export function calculateHeating(room: Room, mode: CalculationMode): CalculationResult {
-  let baseWattage = calculateBaseWattage(room);
-
-  if (mode === 'advanced') {
-    baseWattage = applyAdvancedFactors(room, baseWattage);
+export function calculateHeatingRequirements(room: Room): CalculationResult {
+  const volume = room.length * room.width * room.height;
+  const floorArea = room.length * room.width;
+  
+  // Calculate base wattage using both cubic meter and square meter methods
+  let baseWattage: number;
+  
+  if (room.heatingType === 'full') {
+    // For full room heating, use both volume and floor area calculations
+    const volumeBasedWattage = volume * WATTS_PER_CUBIC_METER[room.insulation];
+    const areaBasedWattage = floorArea * WATTS_PER_SQUARE_METER;
+    // Use the higher value to ensure comfort
+    baseWattage = Math.max(volumeBasedWattage, areaBasedWattage);
+  } else {
+    // For spot heating, calculate based on the coverage area
+    baseWattage = room.spotPercentage ? 
+      (floorArea * WATTS_PER_SQUARE_METER * room.spotPercentage / 100) :
+      (floorArea * WATTS_PER_SQUARE_METER * 0.25); // Default to 25% coverage if not specified
   }
 
-  // Apply spot heating adjustment if applicable
-  if (room.heatingType === 'spot' && room.spotPercentage) {
-    baseWattage = (baseWattage * room.spotPercentage) / 100;
-  }
+  const requiredWattage = Math.ceil(baseWattage);
 
-  const recommendations = generateRecommendations(room, baseWattage);
-  const costEstimate = calculateCostEstimate(baseWattage);
-  const environmentalImpact = calculateEnvironmentalImpact(baseWattage);
-  const panelRecommendations = calculatePanelRecommendations(baseWattage);
+  // Calculate energy costs
+  const dailyKwh = (requiredWattage / 1000) * 8; // Assuming 8 hours usage
+  const costEstimate = {
+    daily: Number((dailyKwh * 0.34).toFixed(2)),
+    monthly: Number((dailyKwh * 0.34 * 30).toFixed(2)),
+    yearly: Number((dailyKwh * 0.34 * 365).toFixed(2))
+  };
+
+  // Calculate environmental impact
+  const co2Savings = Number((dailyKwh * 0.4 * 365).toFixed(2));
+  const energyEfficiency = getEfficiencyRating(requiredWattage, volume);
+
+  // Generate recommendations based on Dutch standards
+  const recommendations = generateDutchRecommendations(room, requiredWattage);
 
   return {
-    totalWattage: Math.ceil(baseWattage),
+    requiredWattage,
     recommendations,
     costEstimate,
-    environmentalImpact,
-    panelRecommendations
+    environmentalImpact: {
+      co2Savings,
+      energyEfficiency
+    }
   };
 }
 
-function calculateBaseWattage(room: Room): number {
-  const volume = room.length * room.width * room.height;
-  return volume * WATTAGE_PER_CUBIC_METER[room.type][room.insulation];
+function getEfficiencyRating(wattage: number, volume: number): string {
+  const wattsPerCubicMeter = wattage / volume;
+  if (wattsPerCubicMeter <= 30) return 'A+++';
+  if (wattsPerCubicMeter <= 35) return 'A++';
+  if (wattsPerCubicMeter <= 40) return 'A+';
+  if (wattsPerCubicMeter <= 45) return 'A';
+  if (wattsPerCubicMeter <= 50) return 'B';
+  return 'C';
 }
 
-function applyAdvancedFactors(room: Room, baseWattage: number): number {
-  let adjustedWattage = baseWattage;
-
-  // Apply window factors
-  const windowHeatLoss = calculateWindowHeatLoss(room.windows);
-  adjustedWattage += windowHeatLoss;
-
-  // Apply wall heat loss
-  const wallHeatLoss = calculateWallHeatLoss(room);
-  adjustedWattage += wallHeatLoss;
-
-  // Apply adjacent space factors
-  const adjacentSpaceFactor = Object.values(room.adjacentSpaces)
-    .reduce((acc, space) => acc * ADJACENT_SPACE_FACTORS[space], 1);
-  adjustedWattage *= adjacentSpaceFactor;
-
-  // Apply material factors
-  const wallFactor = MATERIAL_FACTORS[room.wallType];
-  const ceilingFactor = MATERIAL_FACTORS[room.ceilingType];
-  const floorFactor = MATERIAL_FACTORS[room.floorType];
-  const materialFactor = (wallFactor + ceilingFactor + floorFactor) / 3;
-  adjustedWattage *= materialFactor;
-
-  // Apply ventilation factor
-  adjustedWattage *= VENTILATION_FACTORS[room.ventilationType];
-
-  // Apply occupancy factor
-  const occupancyFactor = 1 + (room.occupancy.numberOfPeople * 0.1) * (room.occupancy.hoursPerDay / 24);
-  adjustedWattage *= occupancyFactor;
-
-  return adjustedWattage;
-}
-
-function calculateWindowHeatLoss(windows: any[]): number {
-  return windows.reduce((total, window) => {
-    const area = window.width * window.height * window.quantity;
-    return total + (area * GLASS_FACTORS[window.glassType] * ORIENTATION_FACTORS[window.orientation]);
-  }, 0);
-}
-
-function calculateWallHeatLoss(room: Room): number {
-  const wallArea = 2 * (room.length + room.width) * room.height;
-  return wallArea * WALL_FACTORS[room.wallType];
-}
-
-function generateRecommendations(room: Room, wattage: number): string[] {
+function generateDutchRecommendations(room: Room, wattage: number): string[] {
   const recommendations: string[] = [];
 
-  // Basic recommendations based on room type and wattage
-  if (room.insulation === 'poor') {
-    recommendations.push('Consider improving insulation to reduce heating requirements.');
-  }
-
-  if (room.windows.length > 0) {
-    const singleGlassWindows = room.windows.filter(w => w.glassType === 'single');
-    if (singleGlassWindows.length > 0) {
-      recommendations.push('Upgrade single-glass windows to double-glazing or better.');
-    }
-  }
-
-  // Panel recommendations based on wattage
-  if (wattage <= 1000) {
-    recommendations.push('Consider using 1-2 medium-sized infrared panels.');
-  } else if (wattage <= 2000) {
-    recommendations.push('Consider using 2-3 medium to large-sized infrared panels.');
+  // Basic heating type recommendations
+  if (room.heatingType === 'full') {
+    recommendations.push(
+      'Voor volledige ruimteverwarming wordt uitgegaan van 40W/m². ' +
+      'De panelen zullen de objecten in de ruimte verwarmen waardoor ook de lucht wordt opgewarmd.'
+    );
   } else {
-    recommendations.push('Consider using multiple large infrared panels or a combination of sizes.');
+    recommendations.push(
+      'Voor plaatselijke verwarming is het belangrijk dat u zich binnen 1,5 meter van het paneel bevindt. ' +
+      'Het paneel moet zo geplaatst worden dat de straling direct op u gericht is.'
+    );
+  }
+
+  // Panel recommendations based on volume
+  const recommendedPanels = STANDARD_PANEL_OPTIONS
+    .filter(panel => panel.wattage >= (wattage * 0.8) && panel.wattage <= (wattage * 1.2))
+    .map(panel => panel.description);
+
+  if (recommendedPanels.length > 0) {
+    recommendations.push('Aanbevolen panelen:');
+    recommendations.push(...recommendedPanels);
+  }
+
+  // Additional recommendations based on room characteristics
+  if (room.insulation === 'poor') {
+    recommendations.push('Overweeg het verbeteren van de isolatie voor een efficiënter systeem.');
+  }
+
+  if (room.windows.some(w => w.glassType === 'single')) {
+    recommendations.push('Het upgraden van enkelglas naar dubbelglas of HR++ kan het energieverbruik aanzienlijk verminderen.');
   }
 
   return recommendations;
-}
-
-function calculateCostEstimate(wattage: number) {
-  const ENERGY_PRICE = 0.34; // € per kWh
-  const DAILY_HOURS = 8; // Average usage hours per day
-
-  const dailyKWh = (wattage / 1000) * DAILY_HOURS;
-  const dailyCost = dailyKWh * ENERGY_PRICE;
-
-  return {
-    daily: Math.round(dailyCost * 100) / 100,
-    monthly: Math.round(dailyCost * 30 * 100) / 100,
-    yearly: Math.round(dailyCost * 365 * 100) / 100
-  };
-}
-
-function calculateEnvironmentalImpact(wattage: number) {
-  // Simplified CO2 savings calculation (kg per year)
-  const GRID_CO2_FACTOR = 0.4; // kg CO2 per kWh
-  const YEARLY_HOURS = 2920; // 8 hours per day * 365 days
-  const yearlyKWh = (wattage / 1000) * YEARLY_HOURS;
-  return {
-    co2Savings: Math.round(yearlyKWh * GRID_CO2_FACTOR),
-    energyEfficiency: calculateEfficiencyRating(wattage)
-  };
-}
-
-function calculateEfficiencyRating(wattage: number): string {
-  // Simple efficiency rating based on wattage
-  if (wattage <= 1000) {
-    return 'A+';
-  } else if (wattage <= 2000) {
-    return 'A';
-  } else {
-    return 'B';
-  }
-}
-
-function calculatePanelRecommendations(totalWattage: number) {
-  const standardPanelWattages = [350, 500, 750, 1000];
-  let bestWattagePerPanel = standardPanelWattages[0];
-  let bestQuantity = Math.ceil(totalWattage / bestWattagePerPanel);
-
-  // Find the most efficient panel configuration
-  standardPanelWattages.forEach(wattage => {
-    const quantity = Math.ceil(totalWattage / wattage);
-    if (quantity * wattage < bestQuantity * bestWattagePerPanel) {
-      bestWattagePerPanel = wattage;
-      bestQuantity = quantity;
-    }
-  });
-
-  // Estimate required area (typical panel is about 0.6m² per 100W)
-  const areaPerPanel = (bestWattagePerPanel / 100) * 0.6;
-  const totalArea = Number((areaPerPanel * bestQuantity).toFixed(2));
-
-  return {
-    quantity: bestQuantity,
-    wattagePerPanel: bestWattagePerPanel,
-    totalArea
-  };
 }

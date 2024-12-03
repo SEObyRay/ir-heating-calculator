@@ -23,18 +23,45 @@ export interface Room {
   length: number;
   width: number;
   height: number;
-  insulation: InsulationType;
-  mountingType: MountingType;
-  panelType: PanelType;
+  type: RoomType;
+  insulation: 'poor' | 'average' | 'good' | 'excellent';
+  heatingType: 'full' | 'spot';
+  spotPercentage?: number;
+  windows: Array<{
+    width: number;
+    height: number;
+    quantity: number;
+    glassType: GlassType;
+    orientation: Orientation;
+  }>;
+  wallType: WallType;
+  ceilingType: WallType;
+  floorType: WallType;
+  ventilationType: VentilationType;
+  adjacentSpaces: {
+    north: AdjacentSpaceType;
+    east: AdjacentSpaceType;
+    south: AdjacentSpaceType;
+    west: AdjacentSpaceType;
+    above: AdjacentSpaceType;
+    below: AdjacentSpaceType;
+  };
+  occupancy: {
+    numberOfPeople: number;
+    hoursPerDay: number;
+  };
 }
 
 export interface CalculationResult {
-  volume: number;
-  recommendedPower: number;
-  verbruikPerUur: number;
-  kostenPerUur: number;
-  kostenPerDag: number;
-  kostenPerMaand: number;
-  stroomprijs: number;
+  requiredWattage: number;
   recommendations: string[];
+  costEstimate: {
+    daily: number;
+    monthly: number;
+    yearly: number;
+  };
+  environmentalImpact: {
+    co2Savings: number;
+    energyEfficiency: string;
+  };
 }
