@@ -1,0 +1,33 @@
+{
+  "name": "IR Verwarming Calculator",
+  "short_name": "IR Calculator",
+  "description": "Bereken eenvoudig het benodigde vermogen en kosten voor infrarood verwarming in je woning.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "nl",
+  "dir": "ltr",
+  "orientation": "any",
+  "categories": ["utilities", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Calculator",
+      "url": "/",
+      "description": "Direct naar de calculator"
+    }
+  ]
+}
