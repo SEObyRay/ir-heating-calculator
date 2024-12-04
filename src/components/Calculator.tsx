@@ -50,13 +50,6 @@ const faqSchema = {
   ]
 };
 
-const STANDAARD_PANELEN = [
-  { wattage: 350, volume: 9, beschrijving: 'Geschikt voor ca. 9 m³, ideaal als elektrische bureau verwarming of voor een klein toilet.' },
-  { wattage: 450, volume: 12, beschrijving: 'Geschikt voor ca. 12 m³, perfect voor een kleine slaapkamer of bijkeuken.' },
-  { wattage: 580, volume: 15, beschrijving: 'Geschikt voor ca. 15 m³, ideaal voor een woonkamer of keuken.' },
-  { wattage: 700, volume: 18, beschrijving: 'Geschikt voor ca. 18 m³, ideaal als infrarood verwarming woonkamer.' }
-];
-
 // Standaard waarden voor een gemiddeld Nederlands huishouden
 const DEFAULTS = {
   OPPERVLAKTE: 45, // m² (gemiddelde woonkamer)
