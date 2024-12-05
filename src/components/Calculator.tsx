@@ -2,6 +2,7 @@
 
 import React, { useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { useStroomprijs } from '../context/StroomprijsContext';
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -73,13 +74,6 @@ export default function Calculator() {
   const [urenPerDag, setUrenPerDag] = useState<number>(DEFAULTS.UREN_PER_DAG);
   const [afstandTotPaneel, setAfstandTotPaneel] = useState<number>(DEFAULTS.AFSTAND_TOT_PANEEL);
   const [result, setResult] = useState<CalculationResult | null>(null);
-
-  const handlePrijsUpdate = (nieuwePrijs: number) => {
-    // Herbereken resultaten als ze bestaan
-    if (result) {
-      berekenVerwarming();
-    }
-  };
 
   const berekenVerwarming = () => {
     // Basis berekeningen
