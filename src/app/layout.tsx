@@ -48,6 +48,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://infraroodcalculator.nl'
+      }
+    ]
+  };
+
   return (
     <html lang="nl">
       <head>
@@ -81,6 +94,12 @@ export default function RootLayout({
                 "Persoonlijk advies"
               ]
             })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbSchema)
           }}
         />
       </head>

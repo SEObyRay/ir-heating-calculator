@@ -17,11 +17,13 @@ export function StroomprijsProvider({ children }: { children: React.ReactNode })
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    console.log('StroomprijsProvider mounted');
     setIsClient(true);
     const opgeslagenPrijs = localStorage.getItem('stroomprijs');
     const opgeslagenDatum = localStorage.getItem('laatstBijgewerkt');
     
     if (opgeslagenPrijs) {
+      console.log('Loading saved price:', opgeslagenPrijs);
       setStroomprijs(parseFloat(opgeslagenPrijs));
     }
     if (opgeslagenDatum) {
@@ -31,6 +33,7 @@ export function StroomprijsProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (isClient) {
+      console.log('Saving new price:', stroomprijs);
       localStorage.setItem('stroomprijs', stroomprijs.toString());
       localStorage.setItem('laatstBijgewerkt', laatstBijgewerkt.toISOString());
     }
@@ -53,5 +56,6 @@ export function useStroomprijs() {
   if (context === undefined) {
     throw new Error('useStroomprijs must be used within a StroomprijsProvider');
   }
+  console.log('Current stroomprijs:', context.stroomprijs);
   return context;
 }
