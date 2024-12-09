@@ -84,12 +84,11 @@ const CalculatorFAQ: React.FC = () => {
       question: string;
       answer: string;
     };
-    index: number;
     isOpen: boolean;
     onToggle: () => void;
   }
 
-  const FAQItem: React.FC<FAQItemProps> = ({ item, index, isOpen, onToggle }) => (
+  const FAQItem: React.FC<FAQItemProps> = ({ item, isOpen, onToggle }) => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-2">
       <button
         onClick={onToggle}
@@ -136,7 +135,7 @@ const CalculatorFAQ: React.FC = () => {
             Vermogen en wattage berekenen voor infrarood panelen
           </h3>
           {faqItems.slice(0, 2).map((item, index) => (
-            <FAQItem key={index} item={item} index={index} isOpen={openIndexes.includes(index)} onToggle={() => toggleQuestion(index)} />
+            <FAQItem key={index} item={item} isOpen={openIndexes.includes(index)} onToggle={() => toggleQuestion(index)} />
           ))}
         </div>
 
@@ -145,7 +144,7 @@ const CalculatorFAQ: React.FC = () => {
             Infrarood panelen als hoofdverwarming of bijverwarming
           </h3>
           {faqItems.slice(2, 4).map((item, index) => (
-            <FAQItem key={index + 2} item={item} index={index + 2} isOpen={openIndexes.includes(index + 2)} onToggle={() => toggleQuestion(index + 2)} />
+            <FAQItem key={index + 2} item={item} isOpen={openIndexes.includes(index + 2)} onToggle={() => toggleQuestion(index + 2)} />
           ))}
         </div>
 
@@ -154,7 +153,7 @@ const CalculatorFAQ: React.FC = () => {
             Kosten en verbruik van infrarood verwarming
           </h3>
           {faqItems.slice(4).map((item, index) => (
-            <FAQItem key={index + 4} item={item} index={index + 4} isOpen={openIndexes.includes(index + 4)} onToggle={() => toggleQuestion(index + 4)} />
+            <FAQItem key={index + 4} item={item} isOpen={openIndexes.includes(index + 4)} onToggle={() => toggleQuestion(index + 4)} />
           ))}
         </div>
       </div>
