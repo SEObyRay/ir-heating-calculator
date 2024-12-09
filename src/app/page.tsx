@@ -1,12 +1,10 @@
 'use client';
 
+import React from 'react';
 import Calculator from '../components/Calculator';
 import FAQ from '../components/FAQ';
 import VerwarmingVergelijking from '../components/VerwarmingVergelijking';
 import Besparing from '../components/Besparing';
-import ROICalculator from '../components/ROICalculator';
-import CO2Vergelijking from '../components/CO2Vergelijking';
-import SubsidieCheck from '../components/SubsidieCheck';
 
 export default function Home() {
   return (
