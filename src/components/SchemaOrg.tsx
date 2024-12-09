@@ -51,16 +51,43 @@ const SchemaOrg: React.FC<SchemaOrgProps> = ({ faqItems }) => {
       }))
     };
 
-    setSchemaScript(JSON.stringify([organizationSchema, webAppSchema, faqSchema]));
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://infraroodcalculator.nl'
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Vermogen Calculator',
+          item: 'https://infraroodcalculator.nl/calculator'
+        }
+      ]
+    };
+
+    setSchemaScript(`
+      <script type="application/ld+json">
+        ${JSON.stringify(organizationSchema)}
+      </script>
+      <script type="application/ld+json">
+        ${JSON.stringify(webAppSchema)}
+      </script>
+      <script type="application/ld+json">
+        ${JSON.stringify(faqSchema)}
+      </script>
+      <script type="application/ld+json">
+        ${JSON.stringify(breadcrumbSchema)}
+      </script>
+    `);
   }, [faqItems]);
 
   return schemaScript ? (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: schemaScript
-      }}
-    />
+    <div dangerouslySetInnerHTML={{ __html: schemaScript }} />
   ) : null;
 };
 
