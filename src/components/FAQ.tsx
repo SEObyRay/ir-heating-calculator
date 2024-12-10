@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { useStroomprijs } from '../context/StroomprijsContext';
 import SchemaOrg from './SchemaOrg';
+import { ChevronDownIcon } from './ChevronDownIcon';
 
 const FAQ: React.FC = () => {
   const { stroomprijs } = useStroomprijs();
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   
   const formatCurrency = (amount: number) => {
     const formatted = new Intl.NumberFormat('nl-NL', {
@@ -44,39 +45,43 @@ const FAQ: React.FC = () => {
     }
   ];
 
+  const toggleFaq = (index: number) => {
+    if (openIndexes.includes(index)) {
+      setOpenIndexes(openIndexes.filter((i) => i !== index));
+    } else {
+      setOpenIndexes([...openIndexes, index]);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto mt-12 p-8">
-      <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">
-        Veelgestelde vragen over infrarood verwarming
-      </h2>
-      
-      <div className="space-y-4">
-        {faqItems.map((item, index) => (
-          <div
-            key={index}
-            className="bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-lg rounded-xl shadow-md border border-white/20 overflow-hidden transition-all duration-200"
-          >
-            <button
-              onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-white/10 transition-colors duration-200"
-            >
-              <span className="font-medium text-gray-800">{item.question}</span>
-              <span className={`transform transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}>
-                <svg className="w-5 h-5 text-gray-600" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                  <path d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </span>
-            </button>
-            
-            <div
-              className={`px-6 transition-all duration-200 ease-in-out ${
-                openIndex === index ? 'max-h-96 py-4' : 'max-h-0 overflow-hidden'
-              }`}
-            >
-              <p className="text-gray-600 whitespace-pre-line">{item.answer}</p>
+    <div className="mt-16">
+      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
+        <h2 className="text-3xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">
+          Veelgestelde vragen over infrarood verwarming
+        </h2>
+        
+        <div className="space-y-4">
+          {faqItems.map((faq, index) => (
+            <div key={index} className="bg-white/60 rounded-xl overflow-hidden">
+              <button
+                onClick={() => toggleFaq(index)}
+                className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-white/80 transition-colors duration-200"
+              >
+                <span className="font-medium text-gray-800">{faq.question}</span>
+                <ChevronDownIcon
+                  className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                    openIndexes.includes(index) ? 'transform rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {openIndexes.includes(index) && (
+                <div className="px-6 py-4 text-gray-600 bg-white/40 whitespace-pre-line">
+                  {faq.answer}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       
       <SchemaOrg faqItems={faqItems} />

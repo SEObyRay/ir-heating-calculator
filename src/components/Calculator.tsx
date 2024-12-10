@@ -107,182 +107,164 @@ export default function Calculator() {
   };
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold text-gray-800 text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">
-        Vermogen infrarood verwarming berekenen
-      </h1>
-      <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-        Bereken snel en eenvoudig het benodigde vermogen voor uw infrarood verwarming en krijg direct inzicht in de kosten.
-      </p>
-      <div className="calculator-form max-w-4xl mx-auto p-8 bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20">
+    <div className="space-y-8">
+      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
+        <h1 className="text-4xl font-bold text-gray-800 text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">
+          Vermogen infrarood verwarming berekenen
+        </h1>
+        <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
+          Bereken snel en eenvoudig het benodigde vermogen voor uw infrarood verwarming en krijg direct inzicht in de kosten.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="form-group">
-            <label htmlFor="verwarmingsType" className="block text-sm font-medium text-gray-700 mb-2">
-              Type verwarming
-            </label>
-            <select
-              id="verwarmingsType"
-              value={verwarmingsType}
-              onChange={(e) => setVerwarmingsType(e.target.value as 'volledig' | 'plaatselijk')}
-              className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              data-tooltip-id="calc-tooltip"
-              data-tooltip-content="Kies 'volledig' voor het verwarmen van de hele ruimte, of 'plaatselijk' voor het verwarmen van een specifiek gebied"
-            >
-              <option value="volledig">Volledige ruimte verwarmen</option>
-              <option value="plaatselijk">Plaatselijke verwarming</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="oppervlakte" className="block text-sm font-medium text-gray-700 mb-2">
-              Oppervlakte (m²)
-            </label>
-            <input
-              id="oppervlakte"
-              type="number"
-              value={oppervlakte}
-              onChange={(e) => setOppervlakte(Number(e.target.value))}
-              className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              data-tooltip-id="calc-tooltip"
-              data-tooltip-content="Voer de oppervlakte van de te verwarmen ruimte in vierkante meters in"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="hoogte" className="block text-sm font-medium text-gray-700 mb-2">
-              Hoogte (m)
-            </label>
-            <input
-              id="hoogte"
-              type="number"
-              value={hoogte}
-              onChange={(e) => setHoogte(Number(e.target.value))}
-              className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              data-tooltip-id="calc-tooltip"
-              data-tooltip-content="Voer de hoogte van het plafond in meters in. Dit beïnvloedt de efficiëntie van de infrarood verwarming"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="isolatie" className="block text-sm font-medium text-gray-700 mb-2">
-              Isolatie
-            </label>
-            <select
-              id="isolatie"
-              value={isolatie}
-              onChange={(e) => setIsolatie(e.target.value as 'goed' | 'matig' | 'slecht')}
-              className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              data-tooltip-id="calc-tooltip"
-              data-tooltip-content="Selecteer de isolatiewaarde van uw ruimte. Goede isolatie (na 2010), matige isolatie (1990-2010), of slechte isolatie (voor 1990)"
-            >
-              <option value="goed">Goed (na 2010)</option>
-              <option value="matig">Matig (1990-2010)</option>
-              <option value="slecht">Slecht (voor 1990)</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="urenPerDag" className="block text-sm font-medium text-gray-700 mb-2">
-              Gebruiksuren per dag
-            </label>
-            <input
-              id="urenPerDag"
-              type="number"
-              value={urenPerDag}
-              onChange={(e) => setUrenPerDag(Number(e.target.value))}
-              className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              data-tooltip-id="calc-tooltip"
-              data-tooltip-content="Voer het aantal uren in dat de verwarming per dag gebruikt zal worden. Dit is belangrijk voor de kostenberekening"
-            />
-          </div>
-
-          {verwarmingsType === 'plaatselijk' && (
-            <div className="form-group">
-              <label htmlFor="afstandTotPaneel" className="block text-sm font-medium text-gray-700 mb-2">
-                Afstand tot paneel (m)
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="oppervlakte" className="block text-sm font-medium text-gray-700 mb-2">
+                Oppervlakte (m²)
               </label>
               <input
-                id="afstandTotPaneel"
                 type="number"
-                value={afstandTotPaneel}
-                onChange={(e) => setAfstandTotPaneel(Number(e.target.value))}
+                id="oppervlakte"
+                value={oppervlakte}
+                onChange={(e) => setOppervlakte(Number(e.target.value))}
                 className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                data-tooltip-id="calc-tooltip"
-                data-tooltip-content="De afstand tussen het infrarood paneel en het te verwarmen oppervlak. Optimale afstand is meestal tussen 1.5 en 2.5 meter"
+                placeholder="Bijv. 20"
               />
             </div>
-          )}
+
+            <div>
+              <label htmlFor="hoogte" className="block text-sm font-medium text-gray-700 mb-2">
+                Plafondhoogte (m)
+              </label>
+              <input
+                type="number"
+                id="hoogte"
+                value={hoogte}
+                onChange={(e) => setHoogte(Number(e.target.value))}
+                className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                placeholder="Bijv. 2.6"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="isolatie" className="block text-sm font-medium text-gray-700 mb-2">
+                Isolatiewaarde
+              </label>
+              <select
+                id="isolatie"
+                value={isolatie}
+                onChange={(e) => setIsolatie(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              >
+                <option value="goed">Goed (nieuwbouw/recent gerenoveerd)</option>
+                <option value="gemiddeld">Gemiddeld (tussen 1975 en 2000)</option>
+                <option value="slecht">Slecht (voor 1975)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="verwarmingsType" className="block text-sm font-medium text-gray-700 mb-2">
+                Type verwarming
+              </label>
+              <select
+                id="verwarmingsType"
+                value={verwarmingsType}
+                onChange={(e) => setVerwarmingsType(e.target.value as 'volledig' | 'plaatselijk')}
+                className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              >
+                <option value="volledig">Volledige ruimte verwarmen</option>
+                <option value="plaatselijk">Plaatselijke verwarming</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="urenPerDag" className="block text-sm font-medium text-gray-700 mb-2">
+                Gebruiksuren per dag
+              </label>
+              <input
+                type="number"
+                id="urenPerDag"
+                value={urenPerDag}
+                onChange={(e) => setUrenPerDag(Number(e.target.value))}
+                className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                placeholder="Bijv. 8"
+              />
+            </div>
+
+            {verwarmingsType === 'plaatselijk' && (
+              <div>
+                <label htmlFor="afstandTotPaneel" className="block text-sm font-medium text-gray-700 mb-2">
+                  Afstand tot paneel (m)
+                </label>
+                <input
+                  type="number"
+                  id="afstandTotPaneel"
+                  value={afstandTotPaneel}
+                  onChange={(e) => setAfstandTotPaneel(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                  placeholder="Bijv. 1.5"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
-        <button
-          onClick={berekenVerwarming}
-          className="w-full mt-8 px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-          data-tooltip-id="calc-tooltip"
-          data-tooltip-content="Bereken het benodigde vermogen en de verwachte kosten voor uw infrarood verwarming"
-        >
-          Bereken
-        </button>
-
-        <Tooltip id="calc-tooltip" place="top" className="z-50 !bg-gray-900/90 !px-4 !py-2 !rounded-lg !text-sm" />
-
-        {result && (
-          <div className="mt-8 p-6 bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Berekend vermogen infrarood verwarming</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="p-4 bg-white/80 rounded-xl">
-                  <p className="text-sm text-gray-500">Volume van de ruimte</p>
-                  <p className="text-2xl font-semibold text-gray-800">{result.volume.toFixed(1)} m³</p>
-                </div>
-                <div className="p-4 bg-white/80 rounded-xl">
-                  <p className="text-sm text-gray-500">Benodigd vermogen</p>
-                  <p className="text-2xl font-semibold text-gray-800">{result.totaalWattage.toFixed(0)}W</p>
-                </div>
-                <div className="p-4 bg-white/80 rounded-xl">
-                  <p className="text-sm text-gray-500">Geschat aantal panelen</p>
-                  <p className="text-2xl font-semibold text-gray-800">{result.aantalPanelen}</p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="p-4 bg-white/80 rounded-xl">
-                  <p className="text-sm text-gray-500">Stroomkosten per uur</p>
-                  <p className="text-2xl font-semibold text-gray-800">€{result.kostenPerUur.toFixed(2)}</p>
-                </div>
-                <div className="p-4 bg-white/80 rounded-xl">
-                  <p className="text-sm text-gray-500">Stroomkosten per dag</p>
-                  <p className="text-2xl font-semibold text-gray-800">€{result.kostenPerDag.toFixed(2)}</p>
-                </div>
-                <div className="p-4 bg-white/80 rounded-xl">
-                  <p className="text-sm text-gray-500">Geschatte stroomkosten per maand</p>
-                  <p className="text-2xl font-semibold text-gray-800">€{result.kostenPerMaand.toFixed(2)}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-6 p-4 bg-blue-50/80 rounded-xl">
-              <h4 className="font-semibold text-blue-900 mb-3">Advies</h4>
-              <div className="space-y-2">
-                {result.aanbevolenPanelen.map((advies, index) => (
-                  <p key={index} className={`text-blue-800 ${index === 0 ? "font-medium" : ""}`}>{advies}</p>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-xs text-gray-500 mt-4">
-              * Berekend met huidige stroomprijs van €{stroomprijs.toFixed(2)}/kWh
-              <br />
-              Laatst bijgewerkt: {laatstBijgewerkt.toLocaleString('nl-NL')}
-            </p>
-          </div>
-        )}
+        <div className="mt-8">
+          <button
+            onClick={berekenVerwarming}
+            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            Bereken Vermogen en Kosten
+          </button>
+        </div>
       </div>
-      <Suspense fallback={<div className="text-sm text-gray-600">Laden...</div>}>
-        <PrijsDisplay />
-      </Suspense>
-      <ErrorBoundary>
-        <CalculatorFAQ />
-      </ErrorBoundary>
+
+      {result && (
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
+          <h2 className="text-2xl font-semibold mb-6">Resultaten</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Benodigd vermogen</h3>
+              <div className="bg-blue-50/50 rounded-xl p-4">
+                <p className="text-3xl font-bold text-blue-600">{result.totaalWattage.toFixed(0)} Watt</p>
+                <p className="text-sm text-blue-600 mt-1">Totaal benodigd vermogen</p>
+              </div>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-gray-600">
+                  • Vermogen per m²: {Math.round(result.totaalWattage / oppervlakte)} W/m²
+                </p>
+                <p className="text-sm text-gray-600">
+                  • Aantal panelen: {Math.ceil(result.totaalWattage / 600)} (uitgaande van 600W per paneel)
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Verbruikskosten</h3>
+              <div className="bg-green-50/50 rounded-xl p-4">
+                <p className="text-3xl font-bold text-green-600">€{result.kostenPerDag.toFixed(2)}</p>
+                <p className="text-sm text-green-600 mt-1">Kosten per dag</p>
+              </div>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-gray-600">
+                  • Per maand: €{(result.kostenPerDag * 30.5).toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  • Per jaar: €{(result.kostenPerDag * 365).toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+    <Suspense fallback={<div className="text-sm text-gray-600">Laden...</div>}>
+      <PrijsDisplay />
+    </Suspense>
+    <ErrorBoundary>
+      <CalculatorFAQ />
+    </ErrorBoundary>
   );
 }
 
