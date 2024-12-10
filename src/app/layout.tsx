@@ -4,12 +4,21 @@ import { StroomprijsProvider } from '../context/StroomprijsContext';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Vermogen infrarood verwarming berekenen | Hoeveel watt per m²',
+  metadataBase: new URL('https://infraroodcalculator.nl'),
+  title: {
+    default: 'Vermogen infrarood verwarming berekenen | Hoeveel watt per m²',
+    template: '%s | Infrarood Calculator'
+  },
   description: 'Bereken het benodigde vermogen voor uw infrarood panelen. Ontdek hoeveel watt u nodig heeft voor verwarming met onze handige calculator voor infraroodpanelen.',
   keywords: 'infrarood verwarming, IR verwarming, verwarmingscalculator, energiekosten, duurzaam verwarmen, elektrisch verwarmen, IR panelen, stroomkosten berekenen, warmteberekening, isolatie advies',
   authors: [{ name: 'IR Verwarming Calculator' }],
   creator: 'IR Verwarming Calculator',
   publisher: 'IR Verwarming Calculator',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
@@ -21,28 +30,29 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'IR Verwarming Calculator | Bereken je Verwarmingskosten',
-    description: 'Bereken direct hoeveel infrarood panelen je nodig hebt en wat de kosten zijn. Inclusief actuele stroomprijzen en persoonlijk advies.',
     type: 'website',
     locale: 'nl_NL',
-    siteName: 'IR Verwarming Calculator',
+    url: 'https://infraroodcalculator.nl',
+    siteName: 'Infrarood Calculator',
+    title: 'Infrarood Verwarming Calculator | Bereken je Verwarmingskosten',
+    description: 'Bereken direct hoeveel infrarood panelen je nodig hebt en wat de kosten zijn. Inclusief actuele stroomprijzen en persoonlijk advies.',
     images: [
       {
-        url: '/favicon.svg',
-        width: 32,
-        height: 32,
-        alt: 'IR Verwarming Calculator Logo'
+        url: 'https://infraroodcalculator.nl/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Infrarood Calculator Preview'
       }
     ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IR Verwarming Calculator | Bereken je Verwarmingskosten',
+    title: 'Infrarood Calculator | Bereken je Verwarmingskosten',
     description: 'Bereken direct hoeveel infrarood panelen je nodig hebt en wat de kosten zijn. Inclusief actuele stroomprijzen en persoonlijk advies.',
-    images: ['/favicon.svg']
+    images: ['https://infraroodcalculator.nl/og-image.jpg']
   },
   alternates: {
-    canonical: 'https://ir-verwarming-calculator.nl'
+    canonical: 'https://infraroodcalculator.nl'
   },
   robots: {
     index: true,
@@ -50,18 +60,14 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
   verification: {
-    google: 'verification_token',
+    google: 'google-site-verification-code',
   },
-  category: 'technology',
-  themeColor: '#FF6B6B'
 };
 
 export default function RootLayout({
