@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useStroomprijs } from '../context/StroomprijsContext';
 import SchemaOrg from './SchemaOrg';
-import { ChevronDownIcon } from './ChevronDownIcon';
 
 const FAQ: React.FC = () => {
   const { stroomprijs } = useStroomprijs();
