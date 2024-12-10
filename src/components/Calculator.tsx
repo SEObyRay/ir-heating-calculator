@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Tooltip } from 'react-tooltip';
 import { useStroomprijs } from '../context/StroomprijsContext';
 import CalculatorFAQ from './CalculatorFAQ';
 import ErrorBoundary from './ErrorBoundary';
