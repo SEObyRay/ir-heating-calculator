@@ -6,6 +6,8 @@ import { useStroomprijs } from '../context/StroomprijsContext';
 import CalculatorFAQ from './CalculatorFAQ';
 import ErrorBoundary from './ErrorBoundary';
 
+type IsolatieType = 'goed' | 'matig' | 'slecht';
+
 interface CalculationResult {
   volume: number;
   totaalWattage: number;
@@ -26,7 +28,7 @@ const PrijsDisplay = dynamic(() => import('./PrijsDisplay'), {
 const DEFAULTS = {
   OPPERVLAKTE: 45, // m² (gemiddelde woonkamer)
   HOOGTE: 2.6,     // m (standaard plafondhoogte)
-  ISOLATIE: 'matig' as const, // Meeste huizen hebben gemiddelde isolatie
+  ISOLATIE: 'matig' as IsolatieType, // Meeste huizen hebben gemiddelde isolatie
   VERWARMINGSTYPE: 'volledig' as 'volledig' | 'plaatselijk',
   AFSTAND_TOT_PANEEL: 1.5, // m (optimale afstand voor plaatselijke verwarming)
   UREN_PER_DAG: 8,  // Gemiddeld gebruik per dag
@@ -37,7 +39,7 @@ const Calculator = () => {
   const [verwarmingsType, setVerwarmingsType] = useState<'volledig' | 'plaatselijk'>(DEFAULTS.VERWARMINGSTYPE);
   const [oppervlakte, setOppervlakte] = useState<number>(DEFAULTS.OPPERVLAKTE);
   const [hoogte, setHoogte] = useState<number>(DEFAULTS.HOOGTE);
-  const [isolatie, setIsolatie] = useState<typeof DEFAULTS.ISOLATIE>(DEFAULTS.ISOLATIE);
+  const [isolatie, setIsolatie] = useState<IsolatieType>(DEFAULTS.ISOLATIE);
   const [urenPerDag, setUrenPerDag] = useState<number>(DEFAULTS.UREN_PER_DAG);
   const [afstandTotPaneel, setAfstandTotPaneel] = useState<number>(DEFAULTS.AFSTAND_TOT_PANEEL);
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -47,19 +49,20 @@ const Calculator = () => {
     const volume = oppervlakte * hoogte;
     
     // Bereken wattage per m² op basis van isolatie
-    let wattagePerM2;
+    let wattagePerM2: number;
     switch (isolatie) {
-      case 'slecht' as const:
+      case 'slecht':
         wattagePerM2 = 125; // Meer wattage nodig voor slechte isolatie (voor 1990)
         break;
-      case 'matig' as const:
+      case 'matig':
         wattagePerM2 = 100; // Gemiddeld wattage voor redelijke isolatie (1975-1990)
         break;
-      case 'goed' as const:
+      case 'goed':
         wattagePerM2 = 75; // Minder wattage nodig voor goede isolatie (na 1990)
         break;
       default:
         wattagePerM2 = 100; // Standaard waarde
+        break;
     }
 
     // Bereken totaal benodigd wattage
@@ -164,7 +167,7 @@ const Calculator = () => {
                 <select
                   id="isolatie"
                   value={isolatie}
-                  onChange={(e) => setIsolatie(e.target.value)}
+                  onChange={(e) => setIsolatie(e.target.value as IsolatieType)}
                   className="w-full px-4 py-3 rounded-xl border-0 bg-white/50 backdrop-blur-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                 >
                   <option value="goed">Goed (nieuwbouw/recent gerenoveerd)</option>
