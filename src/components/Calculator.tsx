@@ -46,20 +46,20 @@ const Calculator = () => {
     // Basis berekeningen
     const volume = oppervlakte * hoogte;
     
-    // Bepaal wattage per m² gebaseerd op isolatie
+    // Bereken wattage per m² op basis van isolatie
     let wattagePerM2;
     switch (isolatie) {
-      case 'slecht':
+      case 'slecht' as const:
         wattagePerM2 = 125; // Meer wattage nodig voor slechte isolatie (voor 1990)
         break;
-      case 'matig':
-        wattagePerM2 = 100; // Gemiddeld wattage voor normale isolatie (1990-2010)
+      case 'matig' as const:
+        wattagePerM2 = 100; // Gemiddeld wattage voor redelijke isolatie (1975-1990)
         break;
-      case 'goed':
-        wattagePerM2 = 75;  // Minder wattage nodig voor goede isolatie (na 2010)
+      case 'goed' as const:
+        wattagePerM2 = 75; // Minder wattage nodig voor goede isolatie (na 1990)
         break;
       default:
-        wattagePerM2 = 100;
+        wattagePerM2 = 100; // Standaard waarde
     }
 
     // Bereken totaal benodigd wattage
