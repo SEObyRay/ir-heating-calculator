@@ -26,7 +26,7 @@ const PrijsDisplay = dynamic(() => import('./PrijsDisplay'), {
 const DEFAULTS = {
   OPPERVLAKTE: 45, // m² (gemiddelde woonkamer)
   HOOGTE: 2.6,     // m (standaard plafondhoogte)
-  ISOLATIE: 'matig' as 'goed' | 'matig' | 'slecht', // Meeste huizen hebben gemiddelde isolatie
+  ISOLATIE: 'matig' as const, // Meeste huizen hebben gemiddelde isolatie
   VERWARMINGSTYPE: 'volledig' as 'volledig' | 'plaatselijk',
   AFSTAND_TOT_PANEEL: 1.5, // m (optimale afstand voor plaatselijke verwarming)
   UREN_PER_DAG: 8,  // Gemiddeld gebruik per dag
@@ -37,7 +37,7 @@ const Calculator = () => {
   const [verwarmingsType, setVerwarmingsType] = useState<'volledig' | 'plaatselijk'>(DEFAULTS.VERWARMINGSTYPE);
   const [oppervlakte, setOppervlakte] = useState<number>(DEFAULTS.OPPERVLAKTE);
   const [hoogte, setHoogte] = useState<number>(DEFAULTS.HOOGTE);
-  const [isolatie, setIsolatie] = useState<'goed' | 'matig' | 'slecht'>(DEFAULTS.ISOLATIE);
+  const [isolatie, setIsolatie] = useState<typeof DEFAULTS.ISOLATIE>(DEFAULTS.ISOLATIE);
   const [urenPerDag, setUrenPerDag] = useState<number>(DEFAULTS.UREN_PER_DAG);
   const [afstandTotPaneel, setAfstandTotPaneel] = useState<number>(DEFAULTS.AFSTAND_TOT_PANEEL);
   const [result, setResult] = useState<CalculationResult | null>(null);
