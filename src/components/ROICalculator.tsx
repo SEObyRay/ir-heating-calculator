@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useStroomprijs } from '../context/StroomprijsContext';
 
 const ROICalculator: React.FC = () => {
-  const { stroomprijs } = useStroomprijs();
   const [aanschafKosten, setAanschafKosten] = useState<number>(3000);
   const [installatieKosten, setInstallatieKosten] = useState<number>(500);
   const [jaarlijkseBesparing, setJaarlijkseBesparing] = useState<number>(800);
