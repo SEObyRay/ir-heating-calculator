@@ -33,7 +33,7 @@ const DEFAULTS = {
 };
 
 const Calculator = () => {
-  const { stroomprijs, laatstBijgewerkt } = useStroomprijs();
+  const { stroomprijs } = useStroomprijs();
   const [verwarmingsType, setVerwarmingsType] = useState<'volledig' | 'plaatselijk'>(DEFAULTS.VERWARMINGSTYPE);
   const [oppervlakte, setOppervlakte] = useState<number>(DEFAULTS.OPPERVLAKTE);
   const [hoogte, setHoogte] = useState<number>(DEFAULTS.HOOGTE);
