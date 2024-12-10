@@ -1,9 +1,6 @@
 import React from 'react';
-import { useStroomprijs } from '../context/StroomprijsContext';
 
 const VerwarmingVergelijking: React.FC = () => {
-  const { stroomprijs } = useStroomprijs();
-
   const verwarmingsTypes = [
     {
       naam: 'Infrarood verwarming',
